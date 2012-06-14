@@ -2,7 +2,7 @@
 
 ## Support ##
 
-* Filt type: .sgf
+* File type: .sgf
 * Size: 19X19
 
 ## TODO ##
