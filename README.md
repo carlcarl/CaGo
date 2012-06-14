@@ -1,11 +1,13 @@
 # CaGO #
 
-## Support ##
+A web page to parse and display go gibo(圍棋棋譜) 
 
-* File type: .sgf
+## Info ##
+
+* File type: sgf
 * Size: 19X19
 
-## TODO ##
+## Todo ##
 
 * Click board function
 * Auto play
