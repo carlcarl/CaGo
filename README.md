@@ -17,5 +17,5 @@
 
 ## Screenshot ##
 
-![screenshot](http://i.minus.com/iM8cD6oheoMgj.png)
+![screenshot](http://i.minus.com/ibncGCLp1BESZH.png)
 
