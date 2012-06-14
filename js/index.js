@@ -8,7 +8,7 @@ var tokenList = ["PW", "PB", "RE", "DT"];
 var optionalTokenList = ["WR", "BR"];
 var stepVector = [[0, 1], [1, 0], [-1, 0], [0, -1]]; // Used for easy traverse and find dead stones
 var fastStepNum = 10; // one click with 10 steps
-var displayNum = true;
+var displayNum = false;
 var metaList = new Array(); // Store file meta info 
 var moveList = new Array();
 var mapList = new Array();
@@ -53,6 +53,7 @@ Dead.prototype.getinfo = function()
 function go()
 {
 	mapList[mapCount++] = copyMap(map); // Initilize a empty map first
+	addToolTip();
 	getFile();
 }
 
@@ -79,7 +80,7 @@ function copyMap(m)
 */ 
 function getFile()
 {
-	$.get("../2010111301285100.sgf", readData);
+	$.get(filePath, readData);
 }
 
 /*
@@ -373,14 +374,27 @@ function paint()
 	}
 }
 
+function addToolTip()
+{
+	$("#begin").tooltip({placement: "bottom"});
+	$("#fastBackward").tooltip({placement: "bottom"});
+	$("#backward").tooltip({placement: "bottom"});
+	$("#forward").tooltip({placement: "bottom"});
+	$("#fastForward").tooltip({placement: "bottom"});
+	$("#end").tooltip({placement: "bottom"});
+	$("#flag").tooltip({placement: "bottom"});
+}
 
 function changeButtonState()
 {
 	if(mapIndex == 0) 
 	{ 
 		$("#begin").attr("disabled", true); 
+		$("#begin").tooltip("hide");
 		$("#backward").attr("disabled", true); 
+		$("#backward").tooltip("hide");
 		$("#fastBackward").attr("disabled", true); 
+		$("#fastBackward").tooltip("hide");
 		$("#end").attr("disabled", false);
 		$("#forward").attr("disabled", false);
 		$("#fastForward").attr("disabled", false);
@@ -391,12 +405,15 @@ function changeButtonState()
 		$("#backward").attr("disabled", false); 
 		$("#fastBackward").attr("disabled", false); 
 		$("#end").attr("disabled", true);
+		$("#end").tooltip("hide");
 		$("#forward").attr("disabled", true);
+		$("#forward").tooltip("hide");
 		$("#fastForward").attr("disabled", true);
+		$("#fastForward").tooltip("hide");
 	}
 	else
 	{
-		//TODO: Improve this in the future zzz
+		// TODO: Improve this in the future zzz
 		$("#begin").attr("disabled", false); 
 		$("#backward").attr("disabled", false); 
 		$("#fastBackward").attr("disabled", false); 
@@ -433,6 +450,12 @@ function forward(num)
 function end()
 {
 	mapIndex = mapCount - 1;
+	paint();
+}
+
+function flag()
+{
+	displayNum = !displayNum;
 	paint();
 }
 
