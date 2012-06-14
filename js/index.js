@@ -4,7 +4,7 @@ var height = width;
 var space = base / 20;
 var twoSpace = space * 2;
 var SIZE = 21;
-var tokenList = ["PW", "PB", "RE", "DT"];
+var tokenList = ["PW", "PB", "RE", "DT", "KM"];
 var optionalTokenList = ["WR", "BR"];
 var stepVector = [[0, 1], [1, 0], [-1, 0], [0, -1]]; // Used for easy traverse and find dead stones
 var fastStepNum = 10; // one click with 10 steps
@@ -106,6 +106,14 @@ function readData(data)
 				}
 		}
 	}
+
+	// Add meta info in web page
+	for(var key in metaList)
+	{
+		$("#" + key).text(metaList[key]);
+	}
+	$("#meta").show();
+
 	for(; i < data.length; i++)
 	{
 		var t = data[i] + data[i + 1];
@@ -125,7 +133,6 @@ function readData(data)
 			var y = d.charCodeAt(1) - "a".charCodeAt(0) + 1;
 			var move = [x, y];
 			moveList.push(move);
-			console.log(mapCount);
 			map[x][y].type = type;
 			map[x][y].num = mapCount;
 			findDeadStone(map, x, y);

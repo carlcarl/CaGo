@@ -15,7 +15,7 @@
 		</script>
 	</head>
 	<body>
-		<div id="content" style="width: 550px; margin: 5px;">
+		<div id="content" style="width: 500px; margin: 5px;">
 			<div id="toolBar" class="btn-toolbar">
 				<div class="btn-group">
 					<button id="begin" class="btn" onclick="begin();" data-original-title="第一手"><i class="icon-step-backward"></i> </button>
@@ -30,6 +30,26 @@
 				</div>
 			</div>
 			<canvas id="myCanvas" width="440" height="440" style="border:1px solid black;"></canvas>
+			<table id="meta" class="table table-striped" style="width: 440px; display: none;">
+				<tr>
+					<th>持黑</th>
+					<th>棋力</th>
+					<th>持白</th>
+					<th>棋力</th>
+					<th>讓子</th>
+					<th>結果</th>
+					<th>日期</th>
+				</tr>
+				<tr>
+					<td id="PB"></td>
+					<td id="BR"></td>
+					<td id="PW"></td>
+					<td id="WR"></td>
+					<td id="KM"></td>
+					<td id="RE"></td>
+					<td id="DT"></td>
+				</tr>
+			</table>
 		</div>
 	</body>
 </html>
