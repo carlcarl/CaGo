@@ -114,6 +114,7 @@ function readData(data)
 		{
 			var result = getTokenData(data, i + 3);
 			var d = result[0];
+			if(d == "") continue;
 			i = result[1];
 
 			var type = -1;
@@ -124,6 +125,7 @@ function readData(data)
 			var y = d.charCodeAt(1) - "a".charCodeAt(0) + 1;
 			var move = [x, y];
 			moveList.push(move);
+			console.log(mapCount);
 			map[x][y].type = type;
 			map[x][y].num = mapCount;
 			findDeadStone(map, x, y);
