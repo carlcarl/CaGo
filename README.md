@@ -1,4 +1,14 @@
-# GoPlayer #
+# CaGO #
+
+## Support ##
+
+* Filt type: .sgf
+* Size: 19X19
+
+## TODO ##
+
+* Click board function
+* Auto play
 
 ## Library version ##
  
