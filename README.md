@@ -7,6 +7,13 @@ A web page to parse and display go gibo(圍棋棋譜)
 * File type: sgf
 * Size: 19X19
 
+## Usage ##
+
+In index.html, find *findPath* and modify it.
+
+	var filePath = "./example.sgf";
+	// var filePath = "whatyouwant.sgf";
+
 ## Todo ##
 
 * Click board function
