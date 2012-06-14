@@ -1,4 +1,4 @@
-# CaGO #
+# CaGo #
 
 A web page to parse and display go gibo(圍棋棋譜) 
 
