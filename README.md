@@ -15,3 +15,7 @@
 * JQuery: 1.7.1
 * Bootstrap: 2.0.4
 
+## Screenshot ##
+
+![screenshot](http://i.minus.com/iM8cD6oheoMgj.png)
+
