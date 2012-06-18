@@ -2,7 +2,7 @@ var base = 400;
 var width = base + (base / 10);
 var height = width; 
 var space = base / 20;
-var twoSpace = space * 2;
+var twoSpace = space << 1;
 var SIZE = 21;
 var tokenList = ["PW", "PB", "RE", "DT", "KM"];
 var optionalTokenList = ["WR", "BR"];
@@ -10,11 +10,7 @@ var stepVector = [[0, 1], [1, 0], [-1, 0], [0, -1]]; // Used for easy traverse a
 var fastStepNum = 10; // one click with 10 steps
 var displayNum = false;
 var metaList = new Array(); // Store file meta info 
-var moveList = new Array();
 var exMoveList = new Array();
-var mapList = new Array();
-var mapCount = 0;
-var mapIndex = 0;
 var map = new Array(SIZE);
 for(var i = 0; i < SIZE; i++)
 {
@@ -23,23 +19,92 @@ for(var i = 0; i < SIZE; i++)
 var exMapList = new Array();
 var exMapCount = 0;
 var exMapIndex = 0;
-var exMap = new Array(SIZE);
-for(var i = 0; i < SIZE; i++)
+
+function GoMap()
 {
-	exMap[i] = new Array(SIZE);
+	this.count = 0;
+	this.index = 0;
+	this.mapList = new Array();
+
+	this.moveList = new Array();
+	this.moveList.push([0, 0]);
+
+
+	this.insert = function(m, mv)
+	{
+		this.insertMap(m);
+		this.insertMove(mv);
+		this.count ++;
+	};
+
+	this.insertMap = function(m)
+	{
+		this.mapList[this.count] = copyMap(m);
+	};
+
+	this.insertMove = function(mv)
+	{
+		this.moveList.push(mv);
+	};
+
+	this.getCurrentMap = function()
+	{
+		return this.mapList[this.index];
+	};
+
+	this.getCurrentMapCellColor = function(i, j)
+	{
+		return this.mapList[this.index][i][j].color;
+	};
+
+	this.getCurrentMoveX = function()
+	{
+		return this.moveList[this.index][0];
+	};
+	
+	this.getCurrentMoveY = function()
+	{
+		return this.moveList[this.index][1];
+	};
+
+	this.getCurrentMapCellNum = function(i, j)
+	{
+		return this.mapList[this.index][i][j].num;
+	}
+
+	this.init = function()
+	{
+		var map = new Array(SIZE);
+		for(var i = 0; i < SIZE; i++)
+		{
+			map[i] = new Array(SIZE);
+			for(var j = 0; j < SIZE; j++)
+			{
+				map[i][j] = new Move(-1, 0);
+			}
+		}
+
+		this.mapList[this.count++] = copyMap(map); // Initilize a empty map first
+	};
+	this.init();
 }
+GoMap.prototype.getinfo = function()
+{
+	return 'hello';
+}
+var goMap = new GoMap();
 
 function Move(t, n)
 {
-	this.type = t;
+	this.color = t;
 	this.num = n;
 }
 Move.prototype.getinfo = function()
 {
-	return this.type + " " + this.num;
+	return this.color + " " + this.num;
 }
 
-moveList.push([0, 0]);
+/* moveList.push([0, 0]); */
 for(var i = 0; i < SIZE; i++)
 {
 	for(var j = 0; j < SIZE; j++)
@@ -61,7 +126,6 @@ Dead.prototype.getinfo = function()
 
 function go()
 {
-	mapList[mapCount++] = copyMap(map); // Initilize a empty map first
 	addToolTip();
 	getFile();
 	$("#myCanvas").click(putGo);
@@ -78,7 +142,7 @@ function copyMap(m)
 		tmpMap[i] = new Array(SIZE);
 		for(var j = 0; j < m[i].length; j++)
 		{
-			var tmp = new Move(m[i][j].type, m[i][j].num);
+			var tmp = new Move(m[i][j].color, m[i][j].num);
 			tmpMap[i][j] = tmp;
 		}
 	}
@@ -135,19 +199,18 @@ function readData(data)
 			if(d == "") continue;
 			i = result[1];
 
-			var type = -1;
-			if(t == ";B") type = 1;
-			else if(t == ";W") type = 0;
+			var color = -1;
+			if(t == ";B") color = 1;
+			else if(t == ";W") color = 0;
 
 			var x = d.charCodeAt(0) - "a".charCodeAt(0) + 1;
 			var y = d.charCodeAt(1) - "a".charCodeAt(0) + 1;
 			var move = [x, y];
-			moveList.push(move);
-			map[x][y].type = type;
-			map[x][y].num = mapCount;
+			map[x][y].color = color;
+			map[x][y].num = goMap.count;
 			findDeadStone(map, x, y);
 
-			mapList[mapCount++] = copyMap(map);
+			goMap.insert(map, move);
 		}
 	}
 	console.log(metaList);
@@ -181,48 +244,48 @@ function getTokenData(data, index)
 function findDeadStone(map, x, y)
 {
 	var m = copyMap(map);
-	var type = m[x][y].type;
+	var color = m[x][y].color;
 	var up = new Dead(true);
 	var down = new Dead(true);
 	var left = new Dead(true);
 	var right = new Dead(true);
 
-	if(m[x + 1][y].type == 1 - type)
+	if(m[x + 1][y].color == 1 - color)
 	{
-		traverse(m, x + 1, y, type, right);
+		traverse(m, x + 1, y, color, right);
 		if(right.value == true)
 		{
-			deleteDeadStone(map, x + 1, y, type);
+			deleteDeadStone(map, x + 1, y, color);
 			return;
 		}
 	}
 
-	if(m[x][y + 1].type == 1 - type)
+	if(m[x][y + 1].color == 1 - color)
 	{
-		traverse(m, x, y + 1, type, down);
+		traverse(m, x, y + 1, color, down);
 		if(down.value == true)
 		{
-			deleteDeadStone(map, x, y + 1, type);
+			deleteDeadStone(map, x, y + 1, color);
 			return;
 		}
 	}
 
-	if(m[x - 1][y].type == 1 - type)
+	if(m[x - 1][y].color == 1 - color)
 	{
-		traverse(m, x - 1, y, type, left);
+		traverse(m, x - 1, y, color, left);
 		if(left.value == true)
 		{
-			deleteDeadStone(map, x - 1, y, type);
+			deleteDeadStone(map, x - 1, y, color);
 			return;
 		}
 	}
 
-	if(m[x][y - 1].type == 1 - type)
+	if(m[x][y - 1].color == 1 - color)
 	{
-		traverse(m, x, y - 1, type, up);
+		traverse(m, x, y - 1, color, up);
 		if(up.value == true)
 		{
-			deleteDeadStone(map, x, y - 1, type);
+			deleteDeadStone(map, x, y - 1, color);
 			return;
 		}
 	}
@@ -231,19 +294,19 @@ function findDeadStone(map, x, y)
 /*
 * Recursive traverse to find dead stones
 */
-function traverse(m, x, y, type, dead)
+function traverse(m, x, y, color, dead)
 {
-	m[x][y].type = -2; // Tag to avoid traversing the same position twice.
+	m[x][y].color = -2; // Tag to avoid traversing the same position twice.
 
 	for(var i = 0; i < stepVector.length; i++)
 	{
 		var xx = x + stepVector[i][0];
 		var yy = y + stepVector[i][1];
-		if(m[xx][yy].type == 1 - type)
+		if(m[xx][yy].color == 1 - color)
 		{
-			traverse(m, xx, yy, type, dead);
+			traverse(m, xx, yy, color, dead);
 		}
-		else if(m[xx][yy].type == -1)
+		else if(m[xx][yy].color == -1)
 		{
 			dead.value = false;
 			return;
@@ -255,18 +318,18 @@ function traverse(m, x, y, type, dead)
 /*
 * Recursive delete stones
 */
-function deleteDeadStone(m, x, y, type)
+function deleteDeadStone(m, x, y, color)
 {
-	m[x][y].type = -1;
+	m[x][y].color = -1;
 
 	for(var i = 0; i < stepVector.length; i++)
 	{
 		var xx = x + stepVector[i][0];
 		var yy = y + stepVector[i][1];
 
-		if(m[xx][yy].type == 1 - type)
+		if(m[xx][yy].color == 1 - color)
 		{
-			deleteDeadStone(m, xx, yy, type);
+			deleteDeadStone(m, xx, yy, color);
 		}
 	}
 }
@@ -283,10 +346,10 @@ function paint()
 	ctx.fillRect(0, 0, width, height);
 	for(var i = 1; i < SIZE - 1; i++)
 	{
-		ctx.moveTo(twoSpace, space * i + space);
-		ctx.lineTo(width - twoSpace, space * i + space);
-		ctx.moveTo(space * i + space, twoSpace);
-		ctx.lineTo(space * i + space, height - twoSpace);
+		ctx.moveTo(twoSpace, space * (i + 1));
+		ctx.lineTo(width - twoSpace, space * (i + 1));
+		ctx.moveTo(space * (i + 1), twoSpace);
+		ctx.lineTo(space * (i + 1), height - twoSpace);
 	}
 	ctx.stroke();
 	ctx.closePath();
@@ -301,18 +364,19 @@ function paint()
 		var baseCode = "A".charCodeAt(0);
 		var code = baseCode + i - 1;
 
-		ctx.fillText(String.fromCharCode(code), space * i + space / 2 + space / 4, space + space / 4);
-		ctx.fillText(String.fromCharCode(code), space * i + space / 2 + space / 4, height - space / 2);
+		ctx.fillText(String.fromCharCode(code), space * (i + 0.75), space + space * 0.25);
+		ctx.fillText(String.fromCharCode(code), space * (i + 0.75), height - space * 0.5);
 
+		var t1 = space * (i + 1.25);
 		if(i < 11)
 		{
-			ctx.fillText(String(20 - i), space / 8, space * i + space + space / 4);
-			ctx.fillText(String(20 - i), width - space, space * i + space + space / 4);
+			ctx.fillText(String(20 - i), space >> 3, t1);
+			ctx.fillText(String(20 - i), width - space, t1);
 		}
 		else
 		{
-			ctx.fillText(String(20 - i), space / 2 , space * i + space + space / 4);
-			ctx.fillText(String(20 - i), width - space, space * i + space + space / 4);
+			ctx.fillText(String(20 - i), space >> 1 , t1);
+			ctx.fillText(String(20 - i), width - space, t1);
 		}
 	}
 	ctx.closePath();
@@ -324,16 +388,16 @@ function paint()
 		{
 			for(var j = 1; j < SIZE - 1; j++)
 			{
-				if(exMapList[exMapCount - 1][i][j].type == 0)
+				if(exMapList[exMapCount - 1][i][j].color == 0)
 				{
 					ctx.fillStyle = "white";
 				}
-				else if(exMapList[exMapCount - 1][i][j].type == 1)
+				else if(exMapList[exMapCount - 1][i][j].color == 1)
 				{
 					ctx.fillStyle = "black";
 				}
 
-				if(exMapList[exMapCount - 1][i][j].type == 0 || exMapList[exMapCount - 1][i][j].type == 1)
+				if(exMapList[exMapCount - 1][i][j].color == 0 || exMapList[exMapCount - 1][i][j].color == 1)
 				{
 					ctx.beginPath();
 					ctx.arc(space * i + space, space * j + space, space / 2, 0, Math.PI * 2, true);
@@ -351,19 +415,20 @@ function paint()
 		{
 			for(var j = 1; j < SIZE - 1; j++)
 			{
-				if(mapList[mapIndex][i][j].type == 0)
+				var c = goMap.getCurrentMapCellColor(i, j);
+				if(c == 0)
 				{
 					ctx.fillStyle = "white";
 				}
-				else if(mapList[mapIndex][i][j].type == 1)
+				else if(c == 1)
 				{
 					ctx.fillStyle = "black";
 				}
 
-				if(mapList[mapIndex][i][j].type == 0 || mapList[mapIndex][i][j].type == 1)
+				if(c == 0 || c == 1)
 				{
 					ctx.beginPath();
-					ctx.arc(space * i + space, space * j + space, space / 2, 0, Math.PI * 2, true);
+					ctx.arc(space * i + space, space * (j + 1), space >> 1, 0, Math.PI * 2, true);
 					ctx.fill();
 					ctx.closePath();
 				}
@@ -372,11 +437,11 @@ function paint()
 	}
 
 	// Tag the current move
-	if(mapIndex > 0)
+	if(goMap.index > 0)
 	{
 		ctx.fillStyle = "red";
 		ctx.beginPath();
-		ctx.arc(space * moveList[mapIndex][0] + space, space * moveList[mapIndex][1] + space, space / 4, 0, Math.PI * 2, true);
+		ctx.arc(space * (goMap.getCurrentMoveX() + 1), space * (goMap.getCurrentMoveY() + 1), space >> 2, 0, Math.PI * 2, true);
 		ctx.fill();
 		ctx.closePath();
 
@@ -387,34 +452,40 @@ function paint()
 		{
 			for(var j = 0; j < SIZE - 1; j++)
 			{
-				if(mapList[mapIndex][i][j].type == 0 || mapList[mapIndex][i][j].type == 1)
+				var c = goMap.getCurrentMapCellColor(i, j);
+				if(c == 0 || c == 1)
 				{
 					ctx.beginPath();
 
-					if(mapList[mapIndex][i][j].type == 0)
+					if(c == 0)
 					{
 						ctx.fillStyle = "black";
 					}
-					else if(mapList[mapIndex][i][j].type == 1)
+					else if(c == 1)
 					{
 						ctx.fillStyle = "white";
 					}
 					ctx.font = "10px sans-serif";
 
 					var fix = 0;
-					if(mapList[mapIndex][i][j].num >= 100)
+					var num = goMap.getCurrentMapCellNum(i, j);
+					if(num >= 100)
 					{ 
-						fix = space / 2;
+						fix = space >> 1;
 					}
-					else if(mapList[mapIndex][i][j].num >= 10 && mapList[mapIndex][i][j].num < 100)
+					else if(num < 10)
 					{
-						fix = space / 2 + space / 8;
+						fix = space * 0.75;
+					}
+					else if(num < 100)
+					{
+						fix = space * 0.625;
 					}
 					else
 					{
-						fix = space / 2 + space / 4;
+						fix = space * 0.75;
 					}
-					ctx.fillText(mapList[mapIndex][i][j].num, space * i + fix, space * j + space + space / 4);
+					ctx.fillText(num, space * i + fix, space * (j + 1.25));
 					ctx.closePath();
 				}
 			}
@@ -443,21 +514,21 @@ function putGo(e)
 	else return;
 	if(exMapCount == 0)
 	{
-		var tmpX = moveList[mapIndex][0];
-		var tmpY = moveList[mapIndex][1];
-		if(mapList[mapIndex][moveX][moveY].type == 1 || mapList[mapIndex][moveX][moveY].type == 0)
+		var tmpX = goMap.getCurrentMoveX();
+		var tmpY = goMap.getCurrentMoveY();
+		if(goMap.getCurrentMapCellColor(moveX, moveY) == 1 || goMap.getCurrentMapCellColor(moveX, moveY) == 0)
 		{
 			return;
 		}
 		else if(tmpX != 0 && tmpY != 0) 
 		{
-			exMapList[exMapCount] = copyMap(mapList[mapIndex]);
-			exMapList[exMapCount][moveX][moveY].type = 1 - mapList[mapIndex][tmpX][tmpY].type;
+			exMapList[exMapCount] = copyMap(goMap.getCurrentMap());
+			exMapList[exMapCount][moveX][moveY].color = 1 - goMap.getCurrentMapCellColor(tmpX, tmpY);
 		}
 		else if(tmpX == 0 && tmpY == 0)
 		{
-			exMapList[exMapCount] = copyMap(mapList[mapIndex]);
-			exMapList[exMapCount][moveX][moveY].type = 1;
+			exMapList[exMapCount] = copyMap(goMap.getCurrentMap());
+			exMapList[exMapCount][moveX][moveY].color = 1;
 		}
 	}
 	else
@@ -465,14 +536,14 @@ function putGo(e)
 		var tmpX = exMoveList[exMapCount - 1][0];
 		var tmpY = exMoveList[exMapCount - 1][1];
 
-		if(exMapList[exMapCount - 1][moveX][moveY].type == 1 || exMapList[exMapCount - 1][moveX][moveY].type == 0)
+		if(exMapList[exMapCount - 1][moveX][moveY].color == 1 || exMapList[exMapCount - 1][moveX][moveY].color == 0)
 		{
 			return;
 		}
 		else if(tmpX != 0 && tmpY != 0) 
 		{
 			exMapList[exMapCount] = copyMap(exMapList[exMapCount - 1]);
-			exMapList[exMapCount][moveX][moveY].type = 1 - exMapList[exMapCount - 1][tmpX][tmpY].type;
+			exMapList[exMapCount][moveX][moveY].color = 1 - exMapList[exMapCount - 1][tmpX][tmpY].color;
 		}
 	}
 
@@ -496,7 +567,7 @@ function addToolTip()
 
 function changeButtonState()
 {
-	if(mapIndex == 0) 
+	if(goMap.index == 0) 
 	{ 
 		$("#begin").attr("disabled", true); 
 		$("#begin").tooltip("hide");
@@ -508,7 +579,7 @@ function changeButtonState()
 		$("#forward").attr("disabled", false);
 		$("#fastForward").attr("disabled", false);
 	}
-	else if(mapIndex == mapCount - 1) 
+	else if(goMap.index == goMap.count - 1) 
 	{
 		$("#begin").attr("disabled", false); 
 		$("#backward").attr("disabled", false); 
@@ -534,31 +605,39 @@ function changeButtonState()
 
 function begin()
 {
-	mapIndex = 0;
+	goMap.index = 0;
 	paint();
 }
 
 function backward(num)
 {
-	if(mapIndex == 0) return;
+	if(exMapCount > 0)
+	{
+		if(exMapCount - num < 0) exMapCount = 0;
+		else exMapCount -= num;
+	}
+	else
+	{
+		if(goMap.index == 0) return;
 
-	if(mapIndex - num < 0) mapIndex = 0;
-	else mapIndex -= num;
+		if(goMap.index - num < 0) goMap.index = 0;
+		else goMap.index -= num;
+	}
 	paint();
 }
 
 function forward(num)
 {
-	if(mapIndex == mapCount - 1) return;
+	if(goMap.index == goMap.count - 1) return;
 
-	if(mapIndex + num >= mapCount) mapIndex = mapCount - 1;
-	else mapIndex += num;
+	if(goMap.index + num >= goMap.count) goMap.index = goMap.count - 1;
+	else goMap.index += num;
 	paint();
 }
 
 function end()
 {
-	mapIndex = mapCount - 1;
+	goMap.index = goMap.count - 1;
 	paint();
 }
 
