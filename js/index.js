@@ -11,6 +11,7 @@ var fastStepNum = 10; // one click with 10 steps
 var displayNum = false;
 var metaList = new Array(); // Store file meta info 
 var moveList = new Array();
+var exMoveList = new Array();
 var mapList = new Array();
 var mapCount = 0;
 var mapIndex = 0;
@@ -18,6 +19,14 @@ var map = new Array(SIZE);
 for(var i = 0; i < SIZE; i++)
 {
 	map[i] = new Array(SIZE);
+}
+var exMapList = new Array();
+var exMapCount = 0;
+var exMapIndex = 0;
+var exMap = new Array(SIZE);
+for(var i = 0; i < SIZE; i++)
+{
+	exMap[i] = new Array(SIZE);
 }
 
 function Move(t, n)
@@ -55,6 +64,7 @@ function go()
 	mapList[mapCount++] = copyMap(map); // Initilize a empty map first
 	addToolTip();
 	getFile();
+	$("#myCanvas").click(putGo);
 }
 
 /*
@@ -307,27 +317,56 @@ function paint()
 	}
 	ctx.closePath();
 
-
-	// Draw stone
-	for(var i = 1; i < SIZE - 1; i++)
+	if(exMapCount != 0)
 	{
-		for(var j = 1; j < SIZE - 1; j++)
+		// Draw stone
+		for(var i = 1; i < SIZE - 1; i++)
 		{
-			if(mapList[mapIndex][i][j].type == 0)
+			for(var j = 1; j < SIZE - 1; j++)
 			{
-				ctx.fillStyle = "white";
-			}
-			else if(mapList[mapIndex][i][j].type == 1)
-			{
-				ctx.fillStyle = "black";
-			}
+				if(exMapList[exMapCount - 1][i][j].type == 0)
+				{
+					ctx.fillStyle = "white";
+				}
+				else if(exMapList[exMapCount - 1][i][j].type == 1)
+				{
+					ctx.fillStyle = "black";
+				}
 
-			if(mapList[mapIndex][i][j].type == 0 || mapList[mapIndex][i][j].type == 1)
+				if(exMapList[exMapCount - 1][i][j].type == 0 || exMapList[exMapCount - 1][i][j].type == 1)
+				{
+					ctx.beginPath();
+					ctx.arc(space * i + space, space * j + space, space / 2, 0, Math.PI * 2, true);
+					ctx.fill();
+					ctx.closePath();
+				}
+			}
+		}
+	}
+
+	else
+	{
+		// Draw stone
+		for(var i = 1; i < SIZE - 1; i++)
+		{
+			for(var j = 1; j < SIZE - 1; j++)
 			{
-				ctx.beginPath();
-				ctx.arc(space * i + space, space * j + space, space / 2, 0, Math.PI * 2, true);
-				ctx.fill();
-				ctx.closePath();
+				if(mapList[mapIndex][i][j].type == 0)
+				{
+					ctx.fillStyle = "white";
+				}
+				else if(mapList[mapIndex][i][j].type == 1)
+				{
+					ctx.fillStyle = "black";
+				}
+
+				if(mapList[mapIndex][i][j].type == 0 || mapList[mapIndex][i][j].type == 1)
+				{
+					ctx.beginPath();
+					ctx.arc(space * i + space, space * j + space, space / 2, 0, Math.PI * 2, true);
+					ctx.fill();
+					ctx.closePath();
+				}
 			}
 		}
 	}
@@ -381,6 +420,67 @@ function paint()
 			}
 		}
 	}
+}
+
+function putGo(e)
+{
+	var x = e.pageX-$("#myCanvas").offset().left;
+	var y = e.pageY-$("#myCanvas").offset().top;
+	x -= twoSpace;
+	y -= twoSpace;
+
+	if(x < 0 || y < 0 || x > base || y > base)
+		return;
+	var moveX = x / space + 1;
+	var baseMoveX = Math.floor(moveX);
+	var moveY = y / space + 1;
+	var baseMoveY = Math.floor(moveY);
+	if(moveX - baseMoveX >= 0.8) moveX = baseMoveX + 1;
+	else if(moveX - baseMoveX <= 0.4) moveX = baseMoveX;
+	else return;
+	if(moveY - baseMoveY >= 0.8) moveY = baseMoveY + 1;
+	else if(moveY - baseMoveY <= 0.4) moveY = baseMoveY;
+	else return;
+	if(exMapCount == 0)
+	{
+		var tmpX = moveList[mapIndex][0];
+		var tmpY = moveList[mapIndex][1];
+		if(mapList[mapIndex][moveX][moveY].type == 1 || mapList[mapIndex][moveX][moveY].type == 0)
+		{
+			return;
+		}
+		else if(tmpX != 0 && tmpY != 0) 
+		{
+			exMapList[exMapCount] = copyMap(mapList[mapIndex]);
+			exMapList[exMapCount][moveX][moveY].type = 1 - mapList[mapIndex][tmpX][tmpY].type;
+		}
+		else if(tmpX == 0 && tmpY == 0)
+		{
+			exMapList[exMapCount] = copyMap(mapList[mapIndex]);
+			exMapList[exMapCount][moveX][moveY].type = 1;
+		}
+	}
+	else
+	{
+		var tmpX = exMoveList[exMapCount - 1][0];
+		var tmpY = exMoveList[exMapCount - 1][1];
+
+		if(exMapList[exMapCount - 1][moveX][moveY].type == 1 || exMapList[exMapCount - 1][moveX][moveY].type == 0)
+		{
+			return;
+		}
+		else if(tmpX != 0 && tmpY != 0) 
+		{
+			exMapList[exMapCount] = copyMap(exMapList[exMapCount - 1]);
+			exMapList[exMapCount][moveX][moveY].type = 1 - exMapList[exMapCount - 1][tmpX][tmpY].type;
+		}
+	}
+
+	exMoveList.push([moveX, moveY]);
+	console.log(exMapList[exMapCount][moveX][moveY]);
+	exMapCount ++;
+	console.log(moveX + ' ' + moveY);
+	paint();
 }
 
 function addToolTip()
