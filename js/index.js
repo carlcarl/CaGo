@@ -3,17 +3,18 @@ var width = base + (base / 10);
 var height = width; 
 var space = base / 20;
 var twoSpace = space << 1;
-var SIZE = 21;
+var SIZE = 19;
+var FIXED_SIZE = SIZE + 2;
 var tokenList = ["PW", "PB", "RE", "DT", "KM"];
 var optionalTokenList = ["WR", "BR"];
 var stepVector = [[0, 1], [1, 0], [-1, 0], [0, -1]]; // Used for easy traverse and find dead stones
 var fastStepNum = 10; // one click with 10 steps
 var displayNum = false;
 var metaList = new Array(); // Store file meta info 
-var map = new Array(SIZE);
-for(var i = 0; i < SIZE; i++)
+var map = new Array(FIXED_SIZE);
+for(var i = 0; i < FIXED_SIZE; i++)
 {
-	map[i] = new Array(SIZE);
+	map[i] = new Array(FIXED_SIZE);
 }
 
 function GoMap()
@@ -76,11 +77,11 @@ function GoMap()
 
 	this.insertEmptyMap = function()
 	{
-		var map = new Array(SIZE);
-		for(var i = 0; i < SIZE; i++)
+		var map = new Array(FIXED_SIZE);
+		for(var i = 0; i < FIXED_SIZE; i++)
 		{
-			map[i] = new Array(SIZE);
-			for(var j = 0; j < SIZE; j++)
+			map[i] = new Array(FIXED_SIZE);
+			for(var j = 0; j < FIXED_SIZE; j++)
 			{
 				map[i][j] = new MapMove(-1, 0);
 			}
@@ -116,9 +117,9 @@ Move.prototype.getinfo = function()
 	return this.x + " " + this.y;
 }
 
-for(var i = 0; i < SIZE; i++)
+for(var i = 0; i < FIXED_SIZE; i++)
 {
-	for(var j = 0; j < SIZE; j++)
+	for(var j = 0; j < FIXED_SIZE; j++)
 	{
 		map[i][j] = new MapMove(-1, 0);
 	}
@@ -147,10 +148,10 @@ function go()
 */
 function copyMap(m)
 {
-	var tmpMap = new Array(SIZE);
+	var tmpMap = new Array(FIXED_SIZE);
 	for(var i = 0; i < m.length; i++)
 	{
-		tmpMap[i] = new Array(SIZE);
+		tmpMap[i] = new Array(FIXED_SIZE);
 		for(var j = 0; j < m[i].length; j++)
 		{
 			var tmp = new MapMove(m[i][j].color, m[i][j].num);
@@ -355,7 +356,7 @@ function paint()
 	ctx.beginPath();
 	ctx.fillStyle = "#D6B66F";
 	ctx.fillRect(0, 0, width, height);
-	for(var i = 1; i < SIZE - 1; i++)
+	for(var i = 1; i < FIXED_SIZE - 1; i++)
 	{
 		ctx.moveTo(twoSpace, space * (i + 1));
 		ctx.lineTo(width - twoSpace, space * (i + 1));
@@ -370,7 +371,7 @@ function paint()
 	ctx.fillStyle = "black";
 	ctx.font = "bold 12px sans-serif";
 	ctx.textBaseline = "bottom";
-	for(var i = 1; i < SIZE - 1; i++)
+	for(var i = 1; i < FIXED_SIZE - 1; i++)
 	{
 		var baseCode = "A".charCodeAt(0);
 		var code = baseCode + i - 1;
@@ -395,9 +396,9 @@ function paint()
 	if(exGoMap.count != 0)
 	{
 		// Draw stone
-		for(var i = 1; i < SIZE - 1; i++)
+		for(var i = 1; i < FIXED_SIZE - 1; i++)
 		{
-			for(var j = 1; j < SIZE - 1; j++)
+			for(var j = 1; j < FIXED_SIZE - 1; j++)
 			{
 				if(exGoMap.mapList[exGoMap.count - 1][i][j].color == 0)
 				{
@@ -421,9 +422,9 @@ function paint()
 	else
 	{
 		// Draw stone
-		for(var i = 1; i < SIZE - 1; i++)
+		for(var i = 1; i < FIXED_SIZE - 1; i++)
 		{
-			for(var j = 1; j < SIZE - 1; j++)
+			for(var j = 1; j < FIXED_SIZE - 1; j++)
 			{
 				var c = goMap.getCurrentMapCellColor(i, j);
 				if(c == 0)
@@ -459,9 +460,9 @@ function paint()
 	}
 	if(displayNum)
 	{
-		for(var i = 0; i < SIZE - 1; i++)
+		for(var i = 0; i < FIXED_SIZE - 1; i++)
 		{
-			for(var j = 0; j < SIZE - 1; j++)
+			for(var j = 0; j < FIXED_SIZE - 1; j++)
 			{
 				var c = goMap.getCurrentMapCellColor(i, j);
 				if(c == 0 || c == 1)
