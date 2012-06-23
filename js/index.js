@@ -10,30 +10,23 @@ var stepVector = [[0, 1], [1, 0], [-1, 0], [0, -1]]; // Used for easy traverse a
 var fastStepNum = 10; // one click with 10 steps
 var displayNum = false;
 var metaList = new Array(); // Store file meta info 
-var exMoveList = new Array();
 var map = new Array(SIZE);
 for(var i = 0; i < SIZE; i++)
 {
 	map[i] = new Array(SIZE);
 }
-var exMapList = new Array();
-var exMapCount = 0;
-var exMapIndex = 0;
 
 function GoMap()
 {
 	this.count = 0;
 	this.index = 0;
 	this.mapList = new Array();
-
 	this.moveList = new Array();
-	this.moveList.push([0, 0]);
 
-
-	this.insert = function(m, mv)
+	this.insert = function(m, move)
 	{
 		this.insertMap(m);
-		this.insertMove(mv);
+		this.insertMove(move);
 		this.count ++;
 	};
 
@@ -42,9 +35,23 @@ function GoMap()
 		this.mapList[this.count] = copyMap(m);
 	};
 
-	this.insertMove = function(mv)
+	this.insertMove = function(move)
 	{
-		this.moveList.push(mv);
+		this.moveList.push(move);
+	};
+
+	this.remove = function(n)
+	{
+		for(var i = 0; i < n; i++)
+		{
+			if(this.count <= 0)
+			{
+				break;
+			}
+			delete this.mapList[this.count - 1];
+			this.moveList.pop();
+			this.count--;
+		}
 	};
 
 	this.getCurrentMap = function()
@@ -57,14 +64,9 @@ function GoMap()
 		return this.mapList[this.index][i][j].color;
 	};
 
-	this.getCurrentMoveX = function()
+	this.getCurrentMove = function()
 	{
-		return this.moveList[this.index][0];
-	};
-	
-	this.getCurrentMoveY = function()
-	{
-		return this.moveList[this.index][1];
+		return this.moveList[this.index];
 	};
 
 	this.getCurrentMapCellNum = function(i, j)
@@ -72,7 +74,7 @@ function GoMap()
 		return this.mapList[this.index][i][j].num;
 	}
 
-	this.init = function()
+	this.insertEmptyMap = function()
 	{
 		var map = new Array(SIZE);
 		for(var i = 0; i < SIZE; i++)
@@ -80,36 +82,45 @@ function GoMap()
 			map[i] = new Array(SIZE);
 			for(var j = 0; j < SIZE; j++)
 			{
-				map[i][j] = new Move(-1, 0);
+				map[i][j] = new MapMove(-1, 0);
 			}
 		}
-
-		this.mapList[this.count++] = copyMap(map); // Initilize a empty map first
+		this.insert(map, new Move(0, 0));
 	};
-	this.init();
 }
 GoMap.prototype.getinfo = function()
 {
 	return 'hello';
 }
 var goMap = new GoMap();
+goMap.insertEmptyMap();
+var exGoMap = new GoMap();
 
-function Move(t, n)
+function MapMove(t, n)
 {
 	this.color = t;
 	this.num = n;
 }
-Move.prototype.getinfo = function()
+MapMove.prototype.getinfo = function()
 {
 	return this.color + " " + this.num;
 }
 
-/* moveList.push([0, 0]); */
+function Move(x, y)
+{
+	this.x = x;
+	this.y = y;
+}
+Move.prototype.getinfo = function()
+{
+	return this.x + " " + this.y;
+}
+
 for(var i = 0; i < SIZE; i++)
 {
 	for(var j = 0; j < SIZE; j++)
 	{
-		map[i][j] = new Move(-1, 0);
+		map[i][j] = new MapMove(-1, 0);
 	}
 }
 
@@ -142,7 +153,7 @@ function copyMap(m)
 		tmpMap[i] = new Array(SIZE);
 		for(var j = 0; j < m[i].length; j++)
 		{
-			var tmp = new Move(m[i][j].color, m[i][j].num);
+			var tmp = new MapMove(m[i][j].color, m[i][j].num);
 			tmpMap[i][j] = tmp;
 		}
 	}
@@ -205,7 +216,7 @@ function readData(data)
 
 			var x = d.charCodeAt(0) - "a".charCodeAt(0) + 1;
 			var y = d.charCodeAt(1) - "a".charCodeAt(0) + 1;
-			var move = [x, y];
+			var move = new Move(x, y);
 			map[x][y].color = color;
 			map[x][y].num = goMap.count;
 			findDeadStone(map, x, y);
@@ -381,23 +392,23 @@ function paint()
 	}
 	ctx.closePath();
 
-	if(exMapCount != 0)
+	if(exGoMap.count != 0)
 	{
 		// Draw stone
 		for(var i = 1; i < SIZE - 1; i++)
 		{
 			for(var j = 1; j < SIZE - 1; j++)
 			{
-				if(exMapList[exMapCount - 1][i][j].color == 0)
+				if(exGoMap.mapList[exGoMap.count - 1][i][j].color == 0)
 				{
 					ctx.fillStyle = "white";
 				}
-				else if(exMapList[exMapCount - 1][i][j].color == 1)
+				else if(exGoMap.mapList[exGoMap.count - 1][i][j].color == 1)
 				{
 					ctx.fillStyle = "black";
 				}
 
-				if(exMapList[exMapCount - 1][i][j].color == 0 || exMapList[exMapCount - 1][i][j].color == 1)
+				if(exGoMap.mapList[exGoMap.count - 1][i][j].color == 0 || exGoMap.mapList[exGoMap.count - 1][i][j].color == 1)
 				{
 					ctx.beginPath();
 					ctx.arc(space * i + space, space * j + space, space / 2, 0, Math.PI * 2, true);
@@ -407,7 +418,6 @@ function paint()
 			}
 		}
 	}
-
 	else
 	{
 		// Draw stone
@@ -441,7 +451,8 @@ function paint()
 	{
 		ctx.fillStyle = "red";
 		ctx.beginPath();
-		ctx.arc(space * (goMap.getCurrentMoveX() + 1), space * (goMap.getCurrentMoveY() + 1), space >> 2, 0, Math.PI * 2, true);
+		var m = goMap.getCurrentMove();
+		ctx.arc(space * (m.x + 1), space * (m.y + 1), space >> 2, 0, Math.PI * 2, true);
 		ctx.fill();
 		ctx.closePath();
 
@@ -506,51 +517,53 @@ function putGo(e)
 	var baseMoveX = Math.floor(moveX);
 	var moveY = y / space + 1;
 	var baseMoveY = Math.floor(moveY);
+
+	// Check the position belong to where 
 	if(moveX - baseMoveX >= 0.8) moveX = baseMoveX + 1;
 	else if(moveX - baseMoveX <= 0.4) moveX = baseMoveX;
 	else return;
 	if(moveY - baseMoveY >= 0.8) moveY = baseMoveY + 1;
 	else if(moveY - baseMoveY <= 0.4) moveY = baseMoveY;
 	else return;
-	if(exMapCount == 0)
+
+	if(exGoMap.count == 0)
 	{
-		var tmpX = goMap.getCurrentMoveX();
-		var tmpY = goMap.getCurrentMoveY();
+		var currentMove = goMap.getCurrentMove();
+
+		// If the position I put is not empty, then ignore it
 		if(goMap.getCurrentMapCellColor(moveX, moveY) == 1 || goMap.getCurrentMapCellColor(moveX, moveY) == 0)
 		{
 			return;
 		}
-		else if(tmpX != 0 && tmpY != 0) 
+		else if(currentMove.x != 0 && currentMove.y != 0)
 		{
-			exMapList[exMapCount] = copyMap(goMap.getCurrentMap());
-			exMapList[exMapCount][moveX][moveY].color = 1 - goMap.getCurrentMapCellColor(tmpX, tmpY);
+			exGoMap.mapList[exGoMap.count] = copyMap(goMap.getCurrentMap());
+			exGoMap.mapList[exGoMap.count][moveX][moveY].color = 1 - goMap.getCurrentMapCellColor(currentMove.x, currentMove.y);
 		}
-		else if(tmpX == 0 && tmpY == 0)
+		else if(currentMoveX == 0 && currentMoveY == 0) // First click
 		{
-			exMapList[exMapCount] = copyMap(goMap.getCurrentMap());
-			exMapList[exMapCount][moveX][moveY].color = 1;
+			exGoMap.mapList[exGoMap.count] = copyMap(goMap.getCurrentMap());
+			exGoMap.mapList[exGoMap.count][moveX][moveY].color = 1;
 		}
 	}
 	else
 	{
-		var tmpX = exMoveList[exMapCount - 1][0];
-		var tmpY = exMoveList[exMapCount - 1][1];
+		var tmp = exGoMap.moveList[exGoMap.count - 1];
 
-		if(exMapList[exMapCount - 1][moveX][moveY].color == 1 || exMapList[exMapCount - 1][moveX][moveY].color == 0)
+		// If the position I put is not empty, then ignore it
+		if(exGoMap.mapList[exGoMap.count - 1][moveX][moveY].color == 1 || exGoMap.mapList[exGoMap.count - 1][moveX][moveY].color == 0)
 		{
 			return;
 		}
-		else if(tmpX != 0 && tmpY != 0) 
+		else if(tmp.x != 0 && tmp.y != 0) 
 		{
-			exMapList[exMapCount] = copyMap(exMapList[exMapCount - 1]);
-			exMapList[exMapCount][moveX][moveY].color = 1 - exMapList[exMapCount - 1][tmpX][tmpY].color;
+			exGoMap.mapList[exGoMap.count] = copyMap(exGoMap.mapList[exGoMap.count - 1]);
+			exGoMap.mapList[exGoMap.count][moveX][moveY].color = 1 - exGoMap.mapList[exGoMap.count - 1][tmp.x][tmp.y].color;
 		}
 	}
 
-	exMoveList.push([moveX, moveY]);
-	console.log(exMapList[exMapCount][moveX][moveY]);
-	exMapCount ++;
-	console.log(moveX + ' ' + moveY);
+	exGoMap.moveList.push(new Move(moveX, moveY));
+	exGoMap.count++;
 	paint();
 }
 
@@ -601,27 +614,37 @@ function changeButtonState()
 		$("#forward").attr("disabled", false);
 		$("#fastForward").attr("disabled", false);
 	}
+
+	if(exGoMap.count > 0)
+	{
+		$("#end").attr("disabled", true);
+		$("#end").tooltip("hide");
+		$("#forward").attr("disabled", true);
+		$("#forward").tooltip("hide");
+		$("#fastForward").attr("disabled", true);
+		$("#fastForward").tooltip("hide");
+	}
 }
 
 function begin()
 {
 	goMap.index = 0;
+	exGoMap.remove(exGoMap.count);
 	paint();
 }
 
 function backward(num)
 {
-	if(exMapCount > 0)
-	{
-		if(exMapCount - num < 0) exMapCount = 0;
-		else exMapCount -= num;
-	}
-	else
+	if(exGoMap.count <= 0)
 	{
 		if(goMap.index == 0) return;
 
 		if(goMap.index - num < 0) goMap.index = 0;
 		else goMap.index -= num;
+	}
+	else
+	{
+		exGoMap.remove(num);
 	}
 	paint();
 }
