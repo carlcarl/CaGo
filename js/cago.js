@@ -174,7 +174,7 @@ var cago = (function($){
 		// Add meta info in web page
 		for(var key in metaList)
 		{
-			$("#" + key).text(metaList[key]);
+			document.getElementById(key).innerHTML = metaList[key];
 		}
 		$("#meta").show();
 
@@ -208,8 +208,8 @@ var cago = (function($){
 
 	function putGo(e)
 	{
-		var x = e.pageX-$("#myCanvas").offset().left;
-		var y = e.pageY-$("#myCanvas").offset().top;
+		var x = e.pageX - $("#myCanvas").offset().left;
+		var y = e.pageY - $("#myCanvas").offset().top;
 		x -= twoSpace;
 		y -= twoSpace;
 
@@ -242,7 +242,7 @@ var cago = (function($){
 				exGoMap.insertMap(goMap.getCurrentMap());
 				exGoMap.mapList[exGoMap.count][moveX][moveY].color = 1 - goMap.getCurrentMapCellColor(currentMove.x, currentMove.y);
 			}
-			else if(currentMoveX == 0 && currentMoveY == 0) // First click
+			else if(currentMove.x == 0 && currentMove.y == 0) // First click
 			{
 				exGoMap.insertMap(goMap.getCurrentMap());
 				exGoMap.mapList[exGoMap.count][moveX][moveY].color = 1;
@@ -546,49 +546,41 @@ var cago = (function($){
 
 	function changeButtonState()
 	{
-		if(goMap.index == 0) 
+		if((goMap.index == 0) && (exGoMap.count == 0)) 
 		{ 
-			$("#begin").attr("disabled", true); 
+			document.getElementById("begin").disabled = true;
 			$("#begin").tooltip("hide");
-			$("#backward").attr("disabled", true); 
+			document.getElementById("backward").disabled = true;
 			$("#backward").tooltip("hide");
-			$("#fastBackward").attr("disabled", true); 
+			document.getElementById("fastBackward").disabled = true;
 			$("#fastBackward").tooltip("hide");
-			$("#end").attr("disabled", false);
-			$("#forward").attr("disabled", false);
-			$("#fastForward").attr("disabled", false);
+
+			document.getElementById("end").disabled = false;
+			document.getElementById("forward").disabled = false;
+			document.getElementById("fastForward").disabled = false;
 		}
-		else if(goMap.index == goMap.count - 1) 
+		else if((goMap.index == goMap.count - 1) || (exGoMap.count > 0)) 
 		{
-			$("#begin").attr("disabled", false); 
-			$("#backward").attr("disabled", false); 
-			$("#fastBackward").attr("disabled", false); 
-			$("#end").attr("disabled", true);
+			document.getElementById("begin").disabled = false;
+			document.getElementById("backward").disabled = false;
+			document.getElementById("fastBackward").disabled = false;
+
+			document.getElementById("end").disabled = true;
 			$("#end").tooltip("hide");
-			$("#forward").attr("disabled", true);
+			document.getElementById("forward").disabled = true;
 			$("#forward").tooltip("hide");
-			$("#fastForward").attr("disabled", true);
+			document.getElementById("fastForward").disabled = true;
 			$("#fastForward").tooltip("hide");
 		}
 		else
 		{
 			// TODO: Improve this in the future zzz
-			$("#begin").attr("disabled", false); 
-			$("#backward").attr("disabled", false); 
-			$("#fastBackward").attr("disabled", false); 
-			$("#end").attr("disabled", false);
-			$("#forward").attr("disabled", false);
-			$("#fastForward").attr("disabled", false);
-		}
-
-		if(exGoMap.count > 0)
-		{
-			$("#end").attr("disabled", true);
-			$("#end").tooltip("hide");
-			$("#forward").attr("disabled", true);
-			$("#forward").tooltip("hide");
-			$("#fastForward").attr("disabled", true);
-			$("#fastForward").tooltip("hide");
+			document.getElementById("begin").disabled = false;
+			document.getElementById("backward").disabled = false;
+			document.getElementById("fastBackward").disabled = false;
+			document.getElementById("end").disabled = false;
+			document.getElementById("forward").disabled = false;
+			document.getElementById("fastForward").disabled = false;
 		}
 	}
 
@@ -600,7 +592,7 @@ var cago = (function($){
 			$(function(){
 				addToolTip();
 				getFile(filePath);
-				$("#myCanvas").click(putGo);
+				document.getElementById("myCanvas").addEventListener("click", putGo, false);
 			});
 		},
 
