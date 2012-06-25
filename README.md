@@ -16,7 +16,6 @@ In index.html, find *findPath* and modify it.
 
 ## Todo ##
 
-* Click board function
 * Auto play
 
 ## Library version ##
