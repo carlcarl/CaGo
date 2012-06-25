@@ -1,18 +1,18 @@
 # CaGo #
 
-A web page to parse and display go gibo(圍棋棋譜) 
+A web page to parse and play go gibo(圍棋棋譜) 
 
-## Info ##
+## Requirement ##
 
 * File type: sgf
 * Size: 19X19
 
 ## Usage ##
 
-In index.html, find *findPath* and modify it.
+In index.html, find *cago.go* and modify its argument.
 
-	var filePath = "./example.sgf";
-	// var filePath = "whatyouwant.sgf";
+	cago.go("./sample.sgf");
+	// cago.go("./whatyouwant.sgf");
 
 ## Todo ##
 
