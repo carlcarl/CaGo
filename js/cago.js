@@ -115,10 +115,10 @@ var cago = (function($){
 	function copyMap(m)
 	{
 		var tmpMap = new Array(FIXED_SIZE);
-		for(var i = 0; i < m.length; i++)
+		for(var i in m)
 		{
 			tmpMap[i] = new Array(FIXED_SIZE);
-			for(var j = 0; j < m[i].length; j++)
+			for(var j in m[i])
 			{
 				var tmp = new MapMove(m[i][j].color, m[i][j].num);
 				tmpMap[i][j] = tmp;
@@ -350,7 +350,7 @@ var cago = (function($){
 	{
 		m[x][y].color = -2; // Tag to avoid traversing the same position twice.
 
-		for(var i = 0; i < stepVector.length; i++)
+		for(var i in stepVector)
 		{
 			var xx = x + stepVector[i][0];
 			var yy = y + stepVector[i][1];
@@ -373,7 +373,7 @@ var cago = (function($){
 	{
 		m[x][y].color = -1;
 
-		for(var i = 0; i < stepVector.length; i++)
+		for(var i in stepVector)
 		{
 			var xx = x + stepVector[i][0];
 			var yy = y + stepVector[i][1];
