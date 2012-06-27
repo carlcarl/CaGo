@@ -13,6 +13,7 @@ var cago = (function($){
 	var fastStepNum = 10; // one click with 10 steps
 	var displayNum = false;
 	var auto = false;
+	var timeInterval = 2000; // 2000ms
 	var metaList = new Array(); // Store file meta info 
 	var map = new Array(FIXED_SIZE);
 
@@ -601,7 +602,7 @@ var cago = (function($){
 		if(auto && goMap.index < goMap.count - 1)
 		{
 			LIB.forward(1);
-			setTimeout(function(){autoPlay();}, 2000);
+			setTimeout(function(){autoPlay();}, timeInterval);
 		}
 	}
 
