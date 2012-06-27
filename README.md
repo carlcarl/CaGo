@@ -16,7 +16,7 @@ In index.html, find *cago.go* and modify its argument.
 
 ## Todo ##
 
-* Auto play
+* Nothing now...
 
 ## Library version ##
  
@@ -25,7 +25,8 @@ In index.html, find *cago.go* and modify its argument.
 
 ## Screenshot ##
 
-![screenshot](http://i.minus.com/ibncGCLp1BESZH.png)
+![screenshot](http://i.minus.com/ibbWnsJd0vf02S.png)
+![screenshot2](http://i.minus.com/ixDnLOfgU74Wq.png)
 
 ## Copyright and license ##
 Copyright 2012 黃健瑋.
