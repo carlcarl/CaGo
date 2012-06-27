@@ -526,7 +526,7 @@ var cago = (function($){
 						}
 						else if(num < 10)
 						{
-							fix = space * 0.75;
+							fix = space * 0.85;
 						}
 						else if(num < 100)
 						{
