@@ -12,6 +12,7 @@ var cago = (function($){
 	var stepVector = [[0, 1], [1, 0], [-1, 0], [0, -1]]; // Used for easy traverse and find dead stones
 	var fastStepNum = 10; // one click with 10 steps
 	var displayNum = false;
+	var auto = false;
 	var metaList = new Array(); // Store file meta info 
 	var map = new Array(FIXED_SIZE);
 
@@ -137,6 +138,7 @@ var cago = (function($){
 		$("#fastForward").tooltip({placement: "bottom"});
 		$("#end").tooltip({placement: "bottom"});
 		$("#flag").tooltip({placement: "bottom"});
+		$("#auto").tooltip({placement: "bottom"});
 	}
 
 	/*
@@ -387,7 +389,6 @@ var cago = (function($){
 
 	function paint()
 	{
-		changeButtonState();
 		var c = document.getElementById("myCanvas");
 		var ctx = c.getContext("2d");
 
@@ -546,6 +547,17 @@ var cago = (function($){
 
 	function changeButtonState()
 	{
+		if(auto == true) 
+		{
+			document.getElementById("begin").disabled = auto;
+			document.getElementById("backward").disabled = auto;
+			document.getElementById("fastBackward").disabled = auto;
+			document.getElementById("end").disabled = auto;
+			document.getElementById("forward").disabled = auto;
+			document.getElementById("fastForward").disabled = auto;
+			return;
+		}
+
 		if((goMap.index == 0) && (exGoMap.count == 0)) 
 		{ 
 			document.getElementById("begin").disabled = true;
@@ -584,6 +596,15 @@ var cago = (function($){
 		}
 	}
 
+	function autoPlay()
+	{
+		if(auto && goMap.index < goMap.count - 1)
+		{
+			LIB.forward(1);
+			setTimeout(function(){autoPlay();}, 2000);
+		}
+	}
+
 	// Public API
 	var LIB = {
 
@@ -601,6 +622,7 @@ var cago = (function($){
 		{
 			goMap.index = 0;
 			exGoMap.remove(exGoMap.count);
+			changeButtonState();
 			paint();
 		},
 
@@ -617,6 +639,7 @@ var cago = (function($){
 			{
 				exGoMap.remove(num);
 			}
+			changeButtonState();
 			paint();
 		},
 
@@ -626,12 +649,14 @@ var cago = (function($){
 
 			if(goMap.index + num >= goMap.count) goMap.index = goMap.count - 1;
 			else goMap.index += num;
+			changeButtonState();
 			paint();
 		},
 
 		"end" : function()
 		{
 			goMap.index = goMap.count - 1;
+			changeButtonState();
 			paint();
 		},
 
@@ -642,6 +667,13 @@ var cago = (function($){
 		{
 			displayNum = !displayNum;
 			paint();
+		},
+
+		"setAuto" : function()
+		{
+			auto = !auto;
+			changeButtonState();
+			autoPlay();
 		}
 	};
 
