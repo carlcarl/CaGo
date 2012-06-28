@@ -164,7 +164,7 @@ var cago = (function($){
 			t = t.toUpperCase();
 			if(tokenList.indexOf(t) != -1 || optionalTokenList.indexOf(t) != -1)
 			{
-				if(data[i + 2] == "[") // 要確定接下來是'['不然可能是一般字串 
+				if(data[i + 2] === "[") // 要確定接下來是'['不然可能是一般字串 
 					{
 						var result = getTokenData(data, i + 3);
 						var d = result[0];
@@ -185,7 +185,7 @@ var cago = (function($){
 		{
 			var t = data[i] + data[i + 1];
 			t = t.toUpperCase();
-			if(t == ";B" || t == ";W")
+			if(t === ";B" || t === ";W")
 			{
 				var result = getTokenData(data, i + 3);
 				var d = result[0];
@@ -193,8 +193,8 @@ var cago = (function($){
 				i = result[1];
 
 				var color = -1;
-				if(t == ";B") color = 1;
-				else if(t == ";W") color = 0;
+				if(t === ";B") color = 1;
+				else if(t === ";W") color = 0;
 
 				var x = d.charCodeAt(0) - "a".charCodeAt(0) + 1;
 				var y = d.charCodeAt(1) - "a".charCodeAt(0) + 1;
@@ -231,12 +231,12 @@ var cago = (function($){
 		else if(moveY - baseMoveY <= 0.4) moveY = baseMoveY;
 		else return;
 
-		if(exGoMap.count == 0)
+		if(exGoMap.count === 0)
 		{
 			var currentMove = goMap.getCurrentMove();
 
 			// If the position I put is not empty, then ignore it
-			if(goMap.getCurrentMapCellColor(moveX, moveY) == 1 || goMap.getCurrentMapCellColor(moveX, moveY) == 0)
+			if(goMap.getCurrentMapCellColor(moveX, moveY) === 1 || goMap.getCurrentMapCellColor(moveX, moveY) === 0)
 			{
 				return;
 			}
@@ -245,7 +245,7 @@ var cago = (function($){
 				exGoMap.insertMap(goMap.getCurrentMap());
 				exGoMap.mapList[exGoMap.count][moveX][moveY].color = 1 - goMap.getCurrentMapCellColor(currentMove.x, currentMove.y);
 			}
-			else if(currentMove.x == 0 && currentMove.y == 0) // First click
+			else if(currentMove.x === 0 && currentMove.y === 0) // First click
 			{
 				exGoMap.insertMap(goMap.getCurrentMap());
 				exGoMap.mapList[exGoMap.count][moveX][moveY].color = 1;
@@ -256,7 +256,7 @@ var cago = (function($){
 			var tmp = exGoMap.moveList[exGoMap.count - 1];
 
 			// If the position I put is not empty, then ignore it
-			if(exGoMap.mapList[exGoMap.count - 1][moveX][moveY].color == 1 || exGoMap.mapList[exGoMap.count - 1][moveX][moveY].color == 0)
+			if(exGoMap.mapList[exGoMap.count - 1][moveX][moveY].color === 1 || exGoMap.mapList[exGoMap.count - 1][moveX][moveY].color === 0)
 			{
 				return;
 			}
@@ -305,10 +305,10 @@ var cago = (function($){
 		var left = new Dead(true);
 		var right = new Dead(true);
 
-		if(m[x + 1][y].color == 1 - color)
+		if(m[x + 1][y].color === 1 - color)
 		{
 			traverse(m, x + 1, y, color, right);
-			if(right.value == true)
+			if(right.value === true)
 			{
 				deleteDeadStone(map, x + 1, y, color);
 				return;
@@ -318,27 +318,27 @@ var cago = (function($){
 		if(m[x][y + 1].color == 1 - color)
 		{
 			traverse(m, x, y + 1, color, down);
-			if(down.value == true)
+			if(down.value === true)
 			{
 				deleteDeadStone(map, x, y + 1, color);
 				return;
 			}
 		}
 
-		if(m[x - 1][y].color == 1 - color)
+		if(m[x - 1][y].color === 1 - color)
 		{
 			traverse(m, x - 1, y, color, left);
-			if(left.value == true)
+			if(left.value === true)
 			{
 				deleteDeadStone(map, x - 1, y, color);
 				return;
 			}
 		}
 
-		if(m[x][y - 1].color == 1 - color)
+		if(m[x][y - 1].color === 1 - color)
 		{
 			traverse(m, x, y - 1, color, up);
-			if(up.value == true)
+			if(up.value === true)
 			{
 				deleteDeadStone(map, x, y - 1, color);
 				return;
@@ -357,11 +357,11 @@ var cago = (function($){
 		{
 			var xx = x + stepVector[i][0];
 			var yy = y + stepVector[i][1];
-			if(m[xx][yy].color == 1 - color)
+			if(m[xx][yy].color === 1 - color)
 			{
 				traverse(m, xx, yy, color, dead);
 			}
-			else if(m[xx][yy].color == -1)
+			else if(m[xx][yy].color === -1)
 			{
 				dead.value = false;
 				return;
@@ -381,7 +381,7 @@ var cago = (function($){
 			var xx = x + stepVector[i][0];
 			var yy = y + stepVector[i][1];
 
-			if(m[xx][yy].color == 1 - color)
+			if(m[xx][yy].color === 1 - color)
 			{
 				deleteDeadStone(m, xx, yy, color);
 			}
@@ -441,16 +441,16 @@ var cago = (function($){
 			{
 				for(var j = 1; j < FIXED_SIZE - 1; j++)
 				{
-					if(exGoMap.mapList[exGoMap.count - 1][i][j].color == 0)
+					if(exGoMap.mapList[exGoMap.count - 1][i][j].color === 0)
 					{
 						ctx.fillStyle = "white";
 					}
-					else if(exGoMap.mapList[exGoMap.count - 1][i][j].color == 1)
+					else if(exGoMap.mapList[exGoMap.count - 1][i][j].color === 1)
 					{
 						ctx.fillStyle = "black";
 					}
 
-					if(exGoMap.mapList[exGoMap.count - 1][i][j].color == 0 || exGoMap.mapList[exGoMap.count - 1][i][j].color == 1)
+					if(exGoMap.mapList[exGoMap.count - 1][i][j].color === 0 || exGoMap.mapList[exGoMap.count - 1][i][j].color === 1)
 					{
 						ctx.beginPath();
 						ctx.arc(space * ( i + 1 ), space * (j + 1), space >> 1, 0, Math.PI * 2, true);
@@ -468,16 +468,16 @@ var cago = (function($){
 				for(var j = 1; j < FIXED_SIZE - 1; j++)
 				{
 					var c = goMap.getCurrentMapCellColor(i, j);
-					if(c == 0)
+					if(c === 0)
 					{
 						ctx.fillStyle = "white";
 					}
-					else if(c == 1)
+					else if(c === 1)
 					{
 						ctx.fillStyle = "black";
 					}
 
-					if(c == 0 || c == 1)
+					if(c === 0 || c === 1)
 					{
 						ctx.beginPath();
 						ctx.arc(space * i + space, space * (j + 1), space >> 1, 0, Math.PI * 2, true);
@@ -506,15 +506,15 @@ var cago = (function($){
 				for(var j = 0; j < FIXED_SIZE - 1; j++)
 				{
 					var c = goMap.getCurrentMapCellColor(i, j);
-					if(c == 0 || c == 1)
+					if(c === 0 || c === 1)
 					{
 						ctx.beginPath();
 
-						if(c == 0)
+						if(c === 0)
 						{
 							ctx.fillStyle = "black";
 						}
-						else if(c == 1)
+						else if(c === 1)
 						{
 							ctx.fillStyle = "white";
 						}
@@ -548,7 +548,7 @@ var cago = (function($){
 
 	function changeButtonState()
 	{
-		if(auto == true) 
+		if(auto === true) 
 		{
 			document.getElementById("begin").disabled = auto;
 			document.getElementById("backward").disabled = auto;
@@ -559,7 +559,7 @@ var cago = (function($){
 			return;
 		}
 
-		if((goMap.index == 0) && (exGoMap.count == 0)) 
+		if((goMap.index === 0) && (exGoMap.count === 0)) 
 		{ 
 			document.getElementById("begin").disabled = true;
 			$("#begin").tooltip("hide");
@@ -572,7 +572,7 @@ var cago = (function($){
 			document.getElementById("forward").disabled = false;
 			document.getElementById("fastForward").disabled = false;
 		}
-		else if((goMap.index == goMap.count - 1) || (exGoMap.count > 0)) 
+		else if((goMap.index === goMap.count - 1) || (exGoMap.count > 0)) 
 		{
 			document.getElementById("begin").disabled = false;
 			document.getElementById("backward").disabled = false;
@@ -631,7 +631,7 @@ var cago = (function($){
 		{
 			if(exGoMap.count <= 0)
 			{
-				if(goMap.index == 0) return;
+				if(goMap.index === 0) return;
 
 				if(goMap.index - num < 0) goMap.index = 0;
 				else goMap.index -= num;
@@ -646,7 +646,7 @@ var cago = (function($){
 
 		"forward" : function(num)
 		{
-			if(goMap.index == goMap.count - 1) return;
+			if(goMap.index === goMap.count - 1) return;
 
 			if(goMap.index + num >= goMap.count) goMap.index = goMap.count - 1;
 			else goMap.index += num;
