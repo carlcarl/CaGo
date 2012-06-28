@@ -122,8 +122,7 @@ var cago = (function($){
 			tmpMap[i] = new Array(FIXED_SIZE);
 			for(var j in m[i])
 			{
-				var tmp = new MapMove(m[i][j].color, m[i][j].num);
-				tmpMap[i][j] = tmp;
+				tmpMap[i][j] = new MapMove(m[i][j].color, m[i][j].num);
 			}
 		}
 		return tmpMap;
@@ -160,17 +159,16 @@ var cago = (function($){
 		var i = 0;
 		for(i = 0; i < metaEnd - 1; i++)
 		{
-			var t = data[i] + data[i + 1];
-			t = t.toUpperCase();
+			var t = data.substring(i, i + 2).toUpperCase();
 			if(tokenList.indexOf(t) != -1 || optionalTokenList.indexOf(t) != -1)
 			{
 				if(data[i + 2] === "[") // 要確定接下來是'['不然可能是一般字串 
-					{
-						var result = getTokenData(data, i + 3);
-						var d = result[0];
-						i = result[1];
-						metaList[t] = d;
-					}
+				{
+					var result = getTokenData(data, i + 3);
+					var d = result[0];
+					i = result[1];
+					metaList[t] = d;
+				}
 			}
 		}
 
@@ -183,8 +181,7 @@ var cago = (function($){
 
 		for(; i < data.length; i++)
 		{
-			var t = data[i] + data[i + 1];
-			t = t.toUpperCase();
+			var t = data.substring(i, i + 2).toUpperCase();
 			if(t === ";B" || t === ";W")
 			{
 				var result = getTokenData(data, i + 3);
@@ -206,6 +203,7 @@ var cago = (function($){
 				goMap.insert(map, move);
 			}
 		}
+		changeButtonState();
 		paint();
 	}
 
@@ -277,10 +275,9 @@ var cago = (function($){
 	*/
 	function getTokenData(data, index)
 	{
-		var d = "";
+		var i = index;
 		while(data[index] != "]")
 		{
-			d += data[index];
 			index++;
 
 			if(index > data.length) // If something terrible happen...
@@ -289,7 +286,7 @@ var cago = (function($){
 				exit(1);
 			}
 		}
-		return [d, index];
+		return [data.substring(i, index), index];
 	}
 
 	/*
