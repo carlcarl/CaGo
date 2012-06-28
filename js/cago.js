@@ -75,7 +75,8 @@ var cago = (function($){
 			map[i] = new Array(FIXED_SIZE);
 			for(var j = 0; j < FIXED_SIZE; j++)
 			{
-				map[i][j] = new MapMove(-1, 0);
+				if(i === 0 || i === FIXED_SIZE - 1 || j === 0 || j === FIXED_SIZE - 1) map[i][j] = new MapMove(-2, 0);
+				else map[i][j] = new MapMove(-1, 0);
 			}
 		}
 		this.insert(map, new Move(0, 0));
@@ -101,7 +102,8 @@ var cago = (function($){
 		map[i] = new Array(FIXED_SIZE);
 		for(var j = 0; j < FIXED_SIZE; j++)
 		{
-			map[i][j] = new MapMove(-1, 0);
+			if(i === 0 || i === FIXED_SIZE - 1 || j === 0 || j === FIXED_SIZE - 1) map[i][j] = new MapMove(-2, 0);
+			else map[i][j] = new MapMove(-1, 0);
 		}
 	}
 
@@ -160,7 +162,7 @@ var cago = (function($){
 		for(i = 0; i < metaEnd - 1; i++)
 		{
 			var t = data.substring(i, i + 2).toUpperCase();
-			if(tokenList.indexOf(t) != -1 || optionalTokenList.indexOf(t) != -1)
+			if($.inArray(t, tokenList) != -1 || $.inArray(t, optionalTokenList) != -1)
 			{
 				if(data[i + 2] === "[") // 要確定接下來是'['不然可能是一般字串 
 				{
@@ -267,6 +269,7 @@ var cago = (function($){
 
 		exGoMap.insertMove(new Move(moveX, moveY));
 		exGoMap.count++;
+		findDeadStone(exGoMap.mapList[exGoMap.count - 1], moveX, moveY);
 		paint();
 	}
 
@@ -283,7 +286,7 @@ var cago = (function($){
 			if(index > data.length) // If something terrible happen...
 			{
 				alert("error");
-				exit(1);
+				return "error";
 			}
 		}
 		return [data.substring(i, index), index];
@@ -308,17 +311,15 @@ var cago = (function($){
 			if(right.value === true)
 			{
 				deleteDeadStone(map, x + 1, y, color);
-				return;
 			}
 		}
 
-		if(m[x][y + 1].color == 1 - color)
+		if(m[x][y + 1].color === 1 - color)
 		{
 			traverse(m, x, y + 1, color, down);
 			if(down.value === true)
 			{
 				deleteDeadStone(map, x, y + 1, color);
-				return;
 			}
 		}
 
@@ -328,7 +329,6 @@ var cago = (function($){
 			if(left.value === true)
 			{
 				deleteDeadStone(map, x - 1, y, color);
-				return;
 			}
 		}
 
@@ -338,7 +338,6 @@ var cago = (function($){
 			if(up.value === true)
 			{
 				deleteDeadStone(map, x, y - 1, color);
-				return;
 			}
 		}
 	}
@@ -611,7 +610,7 @@ var cago = (function($){
 			$(function(){
 				addToolTip();
 				getFile(filePath);
-				document.getElementById("myCanvas").addEventListener("click", putGo, false);
+				$("#myCanvas").click(putGo);
 			});
 		},
 
