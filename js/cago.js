@@ -1,21 +1,24 @@
 var cago = (function($){
 
+	// Your setting variable
 	var base = 400;
+	var SIZE = 19;
+	var fastStepNum = 10; // one click with 10 steps
+	var timeInterval = 2000; // 2000ms
+
+	// Program variable
 	var width = base + (base / 10);
 	var height = width; 
 	var space = base / 20;
-	var twoSpace = space << 1;
-	var SIZE = 19;
 	var FIXED_SIZE = SIZE + 2;
 	var tokenList = ["PW", "PB", "RE", "DT", "KM"];
 	var optionalTokenList = ["WR", "BR"];
 	var stepVector = [[0, 1], [1, 0], [-1, 0], [0, -1]]; // Used for easy traverse and find dead stones
-	var fastStepNum = 10; // one click with 10 steps
 	var displayNum = false;
 	var auto = false;
-	var timeInterval = 2000; // 2000ms
 	var metaList = new Array(); // Store file meta info 
 	var map = new Array(FIXED_SIZE);
+	var twoSpace = space << 1;
 
 	function GoMap()
 	{
@@ -593,6 +596,7 @@ var cago = (function($){
 		}
 	}
 
+	// Called by LIB.setAuto
 	function autoPlay()
 	{
 		if(auto && goMap.index < goMap.count - 1)
