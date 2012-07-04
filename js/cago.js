@@ -614,7 +614,7 @@ var cago = (function($){
 			$(function(){
 				addToolTip();
 				getFile(filePath);
-				$("#myCanvas").click(putGo);
+				$("#myCanvas").click(putGo); // Use jQuery to work with IE
 			});
 		},
 
@@ -673,6 +673,14 @@ var cago = (function($){
 		"setAuto" : function()
 		{
 			auto = !auto;
+			if(auto === true)
+			{
+				$("#myCanvas").off("click");
+			}
+			else
+			{
+				$("#myCanvas").click(putGo);
+			}
 			changeButtonState();
 			autoPlay();
 		}
