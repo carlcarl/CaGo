@@ -3,13 +3,13 @@
 	<head>
 		<meta charset="utf-8" />
 		<title>Canvas</title>
-		<link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css" />
-		<script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
-		<script type="text/javascript" src="bootstrap/js/bootstrap-tooltip.min.js"></script>
-		<script type="text/javascript" src="js/cago.js"></script>
-		<script type="text/javascript">
+		<link rel="stylesheet" href="bootstrap/css/bootstrap.min.css" />
+		<script defer src="js/jquery-1.7.2.min.js"></script>
+		<script defer src="bootstrap/js/bootstrap-tooltip.min.js"></script>
+		<script defer src="js/cago.js"></script>
+		<script>
 
-			cago.go("./example.sgf");
+			window.onload = function(){cago.go("./example.sgf");};
 			
 		</script>
 	</head>

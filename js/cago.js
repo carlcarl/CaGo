@@ -146,14 +146,6 @@ var cago = (function($){
 		$("#auto").tooltip({placement: "bottom"});
 	}
 
-	/*
-	* Use ajax to get gibo
-	*/ 
-	function getFile(filePath)
-	{
-		$.get(filePath, init);
-	}
-
 	function init(data)
 	{
 		readData(data);
@@ -619,13 +611,8 @@ var cago = (function($){
 
 		"go" : function(filePath)
 		{
-			$(function(){
-				addToolTip();
-				getFile(filePath);
-				$("#myCanvas").click(putGo); // Use jQuery to work with IE
-			});
+			$.get(filePath, init);
 		},
-
 
 		"begin" : function()
 		{

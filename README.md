@@ -11,8 +11,8 @@ A web page to parse and play go gibo(圍棋棋譜)
 
 In index.html, find *cago.go* and modify its argument.
 
-	cago.go("./sample.sgf");
-	// cago.go("./whatyouwant.sgf");
+	window.onload = function(){cago.go("./example.sgf");};
+	// window.onload = function(){cago.go("./whatyouwant.sgf");};
 
 ## Todo ##
 
