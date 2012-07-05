@@ -151,7 +151,24 @@ var cago = (function($){
 	*/ 
 	function getFile(filePath)
 	{
-		$.get(filePath, readData);
+		$.get(filePath, init);
+	}
+
+	function init(data)
+	{
+		readData(data);
+
+		// Add meta info in web page
+		for(var key in metaList)
+		{
+			document.getElementById(key).innerHTML = metaList[key];
+		}
+		$("#meta").show();
+
+		paint();
+		changeButtonState();
+		addToolTip();
+		$("#myCanvas").click(putGo); // Use jQuery to work with IE
 	}
 
 	/*
@@ -177,13 +194,6 @@ var cago = (function($){
 			}
 		}
 
-		// Add meta info in web page
-		for(var key in metaList)
-		{
-			document.getElementById(key).innerHTML = metaList[key];
-		}
-		$("#meta").show();
-
 		for(; i < data.length; i++)
 		{
 			var t = data.substring(i, i + 2).toUpperCase();
@@ -208,8 +218,6 @@ var cago = (function($){
 				goMap.insert(map, move);
 			}
 		}
-		changeButtonState();
-		paint();
 	}
 
 	function putGo(e)
