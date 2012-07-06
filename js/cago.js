@@ -580,6 +580,21 @@ var cago = (function($){
 		}
 	}
 
+	/*
+	 * Add click event on buttons
+	 */
+	function addButtonEvent()
+	{
+		$("#begin").click(API.begin);
+		$("#fastBackward").click(function(){API.backward(10);});
+		$("#backward").click(function(){API.backward(1);});
+		$("#forward").click(function(){API.forward(1);});
+		$("#fastForward").click(function(){API.forward(10);});
+		$("#end").click(API.end);
+		$("#flag").click(API.flag);
+		$("#auto").click(API.setAuto);
+	}
+
 	// Called by API.setAuto
 	function autoPlay()
 	{
@@ -605,6 +620,7 @@ var cago = (function($){
 		paint();
 		addToolTip();
 		changeButtonState();
+		addButtonEvent();
 		$("#myCanvas").click(putGo); // Use jQuery to work with IE
 	}
 
