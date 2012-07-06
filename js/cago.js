@@ -1,7 +1,7 @@
 var cago = (function($){
 
 	// Your setting variable
-	var base = 400;
+	var base = 400; // board base width
 	var SIZE = 19;
 	var fastStepNum = 10; // one click with 10 steps
 	var timeInterval = 2000; // 2000ms
@@ -146,22 +146,6 @@ var cago = (function($){
 		$("#auto").tooltip({placement: "bottom"});
 	}
 
-	function init(data)
-	{
-		readData(data);
-
-		// Add meta info in web page
-		for(var key in metaList)
-		{
-			document.getElementById(key).innerHTML = metaList[key];
-		}
-		$("#meta").show();
-
-		paint();
-		changeButtonState();
-		addToolTip();
-		$("#myCanvas").click(putGo); // Use jQuery to work with IE
-	}
 
 	/*
 	* Parse the gibo data
@@ -596,22 +580,40 @@ var cago = (function($){
 		}
 	}
 
-	// Called by LIB.setAuto
+	// Called by API.setAuto
 	function autoPlay()
 	{
 		if(auto && goMap.index < goMap.count - 1)
 		{
-			LIB.forward(1);
+			API.forward(1);
 			setTimeout(function(){autoPlay();}, timeInterval);
 		}
 	}
 
+	// Main process
+	function main(data)
+	{
+		readData(data);
+
+		// Add meta info in web page
+		for(var key in metaList)
+		{
+			document.getElementById(key).innerHTML = metaList[key];
+		}
+		$("#meta").show();
+
+		paint();
+		addToolTip();
+		changeButtonState();
+		$("#myCanvas").click(putGo); // Use jQuery to work with IE
+	}
+
 	// Public API
-	var LIB = {
+	var API = {
 
 		"go" : function(filePath)
 		{
-			$.get(filePath, init);
+			$.get(filePath, main);
 		},
 
 		"begin" : function()
@@ -681,6 +683,6 @@ var cago = (function($){
 		}
 	};
 
-	return LIB;
+	return API;
 })(jQuery);
 
