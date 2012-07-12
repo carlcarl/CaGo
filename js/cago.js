@@ -257,6 +257,7 @@ var cago = (function($){
 		exGoMap.insertMove(new Move(moveX, moveY));
 		exGoMap.count++;
 		findDeadStone(exGoMap.mapList[exGoMap.count - 1], moveX, moveY);
+		changeButtonState();
 		paint();
 	}
 
