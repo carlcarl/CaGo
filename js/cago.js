@@ -20,6 +20,12 @@ var cago = (function($){
 	var map = new Array(FIXED_SIZE);
 	var twoSpace = space << 1;
 
+	// Improve speed
+	var FS = FIXED_SIZE - 1;
+	var S = space >> 1;
+	var S2 = space >> 2;
+	var MP = Math.PI * 2; // Cannot use <<, this will cause error
+
 	function GoMap()
 	{
 		this.count = 0;
@@ -78,7 +84,7 @@ var cago = (function($){
 			map[i] = new Array(FIXED_SIZE);
 			for(var j = 0; j < FIXED_SIZE; j++)
 			{
-				if(i === 0 || i === FIXED_SIZE - 1 || j === 0 || j === FIXED_SIZE - 1) map[i][j] = new MapMove(-2, 0);
+				if(i === 0 || i === FS || j === 0 || j === FS) map[i][j] = new MapMove(-2, 0);
 				else map[i][j] = new MapMove(-1, 0);
 			}
 		}
@@ -105,7 +111,7 @@ var cago = (function($){
 		map[i] = new Array(FIXED_SIZE);
 		for(var j = 0; j < FIXED_SIZE; j++)
 		{
-			if(i === 0 || i === FIXED_SIZE - 1 || j === 0 || j === FIXED_SIZE - 1) map[i][j] = new MapMove(-2, 0);
+			if(i === 0 || i === FS || j === 0 || j === FS) map[i][j] = new MapMove(-2, 0);
 			else map[i][j] = new MapMove(-1, 0);
 		}
 	}
@@ -155,7 +161,7 @@ var cago = (function($){
 		var metaEnd = data.indexOf(";B");
 
 		var i = 0;
-		for(i = 0; i < metaEnd - 1; i++)
+		for(var me = metaEnd - 1; i < me; i++)
 		{
 			var t = data.substring(i, i + 2).toUpperCase();
 			if($.inArray(t, tokenList) != -1 || $.inArray(t, optionalTokenList) != -1)
@@ -381,12 +387,12 @@ var cago = (function($){
 		ctx.beginPath();
 		ctx.fillStyle = "#D6B66F";
 		ctx.fillRect(0, 0, width, height);
-		for(var i = 1; i < FIXED_SIZE - 1; i++)
+		for(var i = 1, wts = width - twoSpace, hts = height - twoSpace; i < FS; i++)
 		{
 			ctx.moveTo(twoSpace, space * (i + 1));
-			ctx.lineTo(width - twoSpace, space * (i + 1));
+			ctx.lineTo(wts, space * (i + 1));
 			ctx.moveTo(space * (i + 1), twoSpace);
-			ctx.lineTo(space * (i + 1), height - twoSpace);
+			ctx.lineTo(space * (i + 1), hts);
 		}
 		ctx.stroke();
 		ctx.closePath();
@@ -396,24 +402,24 @@ var cago = (function($){
 		ctx.fillStyle = "black";
 		ctx.font = "bold 12px sans-serif";
 		ctx.textBaseline = "bottom";
-		for(var i = 1; i < FIXED_SIZE - 1; i++)
+		for(var i = 1, ss = space + space * 0.25, hs = height - space * 0.5, ws = width - space, s3 = space >> 3; i < FS; i++)
 		{
 			var baseCode = "A".charCodeAt(0);
 			var code = baseCode + i - 1;
 
-			ctx.fillText(String.fromCharCode(code), space * (i + 0.75), space + space * 0.25);
-			ctx.fillText(String.fromCharCode(code), space * (i + 0.75), height - space * 0.5);
+			ctx.fillText(String.fromCharCode(code), space * (i + 0.75), ss);
+			ctx.fillText(String.fromCharCode(code), space * (i + 0.75), hs);
 
 			var t1 = space * (i + 1.25);
 			if(i < 11)
 			{
-				ctx.fillText(String(20 - i), space >> 3, t1);
-				ctx.fillText(String(20 - i), width - space, t1);
+				ctx.fillText(String(20 - i), s3, t1);
+				ctx.fillText(String(20 - i), ws, t1);
 			}
 			else
 			{
-				ctx.fillText(String(20 - i), space >> 1 , t1);
-				ctx.fillText(String(20 - i), width - space, t1);
+				ctx.fillText(String(20 - i), S, t1);
+				ctx.fillText(String(20 - i), ws, t1);
 			}
 		}
 		ctx.closePath();
@@ -421,23 +427,24 @@ var cago = (function($){
 		if(exGoMap.count != 0)
 		{
 			// Draw stone
-			for(var i = 1; i < FIXED_SIZE - 1; i++)
+			var c = exGoMap.count - 1;
+			for(var i = 1; i < FS; i++)
 			{
-				for(var j = 1; j < FIXED_SIZE - 1; j++)
+				for(var j = 1; j < FS; j++)
 				{
-					if(exGoMap.mapList[exGoMap.count - 1][i][j].color === 0)
+					if(exGoMap.mapList[c][i][j].color === 0)
 					{
 						ctx.fillStyle = "white";
 					}
-					else if(exGoMap.mapList[exGoMap.count - 1][i][j].color === 1)
+					else if(exGoMap.mapList[c][i][j].color === 1)
 					{
 						ctx.fillStyle = "black";
 					}
 
-					if(exGoMap.mapList[exGoMap.count - 1][i][j].color === 0 || exGoMap.mapList[exGoMap.count - 1][i][j].color === 1)
+					if(exGoMap.mapList[c][i][j].color === 0 || exGoMap.mapList[c][i][j].color === 1)
 					{
 						ctx.beginPath();
-						ctx.arc(space * ( i + 1 ), space * (j + 1), space >> 1, 0, Math.PI * 2, true);
+						ctx.arc(space * ( i + 1 ), space * (j + 1), S, 0, MP, true);
 						ctx.fill();
 						ctx.closePath();
 					}
@@ -447,9 +454,9 @@ var cago = (function($){
 		else
 		{
 			// Draw stone
-			for(var i = 1; i < FIXED_SIZE - 1; i++)
+			for(var i = 1; i < FS; i++)
 			{
-				for(var j = 1; j < FIXED_SIZE - 1; j++)
+				for(var j = 1; j < FS; j++)
 				{
 					var c = goMap.getCurrentMapCellColor(i, j);
 					if(c === 0)
@@ -464,7 +471,7 @@ var cago = (function($){
 					if(c === 0 || c === 1)
 					{
 						ctx.beginPath();
-						ctx.arc(space * i + space, space * (j + 1), space >> 1, 0, Math.PI * 2, true);
+						ctx.arc(space * i + space, space * (j + 1), S, 0, MP, true);
 						ctx.fill();
 						ctx.closePath();
 					}
@@ -478,16 +485,19 @@ var cago = (function($){
 			ctx.fillStyle = "red";
 			ctx.beginPath();
 			var m = goMap.getCurrentMove();
-			ctx.arc(space * (m.x + 1), space * (m.y + 1), space >> 2, 0, Math.PI * 2, true);
+			ctx.arc(space * (m.x + 1), space * (m.y + 1), S2, 0, MP, true);
 			ctx.fill();
 			ctx.closePath();
 
 		}
 		if(displayNum)
 		{
-			for(var i = 0; i < FIXED_SIZE - 1; i++)
+			var s85 = space * 0.85;
+			var s75 = space * 0.75;
+			var s625 = space * 0.625;
+			for(var i = 0; i < FS; i++)
 			{
-				for(var j = 0; j < FIXED_SIZE - 1; j++)
+				for(var j = 0; j < FS; j++)
 				{
 					var c = goMap.getCurrentMapCellColor(i, j);
 					if(c === 0 || c === 1)
@@ -508,19 +518,19 @@ var cago = (function($){
 						var num = goMap.getCurrentMapCellNum(i, j);
 						if(num >= 100)
 						{ 
-							fix = space >> 1;
+							fix = S;
 						}
 						else if(num < 10)
 						{
-							fix = space * 0.85;
+							fix = s85;
 						}
 						else if(num < 100)
 						{
-							fix = space * 0.625;
+							fix = s625;
 						}
 						else
 						{
-							fix = space * 0.75;
+							fix = s75;
 						}
 						ctx.fillText(num, space * i + fix, space * (j + 1.25));
 						ctx.closePath();
