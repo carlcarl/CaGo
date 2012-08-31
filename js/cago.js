@@ -20,7 +20,7 @@ var cago = (function($){
 	var map = new Array(FIXED_SIZE);
 	var twoSpace = space << 1;
 
-	// Improve speed
+	// Improve performance
 	var FS = FIXED_SIZE - 1;
 	var S = space >> 1;
 	var S2 = space >> 2;
@@ -211,9 +211,9 @@ var cago = (function($){
 
 		if(x < 0 || y < 0 || x > base || y > base)
 			return;
-		var moveX = x / space + 1;
+		var moveX = (x / space) + 1;
 		var baseMoveX = Math.floor(moveX);
-		var moveY = y / space + 1;
+		var moveY = (y / space) + 1;
 		var baseMoveY = Math.floor(moveY);
 
 		// Check the position belong to where 
@@ -224,11 +224,12 @@ var cago = (function($){
 		else if(moveY - baseMoveY <= 0.4) moveY = baseMoveY;
 		else return;
 
+		// First click on the board
 		if(exGoMap.count === 0)
 		{
 			var currentMove = goMap.getCurrentMove();
 
-			// If the position I put is not empty, then ignore it
+			// If the position I put is not empty, just ignore it
 			if(goMap.getCurrentMapCellColor(moveX, moveY) === 1 || goMap.getCurrentMapCellColor(moveX, moveY) === 0)
 			{
 				return;
