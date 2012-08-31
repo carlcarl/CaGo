@@ -233,12 +233,12 @@ var cago = (function($){
 			{
 				return;
 			}
-			else if(currentMove.x != 0 && currentMove.y != 0)
+			else if(currentMove.x != 0 && currentMove.y != 0) // Already exist some stones on the board
 			{
 				exGoMap.insertMap(goMap.getCurrentMap());
 				exGoMap.mapList[exGoMap.count][moveX][moveY].color = 1 - goMap.getCurrentMapCellColor(currentMove.x, currentMove.y);
 			}
-			else if(currentMove.x === 0 && currentMove.y === 0) // First click
+			else if(currentMove.x === 0 && currentMove.y === 0) // First click without any stone on the board
 			{
 				exGoMap.insertMap(goMap.getCurrentMap());
 				exGoMap.mapList[exGoMap.count][moveX][moveY].color = 1;
@@ -365,6 +365,7 @@ var cago = (function($){
 	function deleteDeadStone(m, x, y, color)
 	{
 		m[x][y].color = -1;
+		m[x][y].num = -1;
 
 		for(var i in stepVector)
 		{
@@ -499,7 +500,7 @@ var cago = (function($){
 			{
 				for(var j = 0; j < FS; j++)
 				{
-					var c = goMap.getCurrentMapCellColor(i, j);
+					var c = exGoMap.count != 0 ? exGoMap.mapList[exGoMap.count - 1][i][j].color : goMap.getCurrentMapCellColor(i, j);
 					if(c === 0 || c === 1)
 					{
 						ctx.beginPath();
@@ -515,11 +516,12 @@ var cago = (function($){
 						ctx.font = "10px sans-serif";
 
 						var fix = 0;
-						var num = goMap.getCurrentMapCellNum(i, j);
+						var num = exGoMap.count != 0 ? exGoMap.mapList[exGoMap.count - 1][i][j].num : goMap.getCurrentMapCellNum(i, j);
 						if(num >= 100)
 						{ 
 							fix = S;
 						}
+						else if(num <= 0) continue;
 						else if(num < 10)
 						{
 							fix = s85;
