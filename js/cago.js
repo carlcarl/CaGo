@@ -179,14 +179,7 @@ var cago = (function($){
 	 */
 	function addToolTip()
 	{
-		$("#begin").tooltip({placement: "bottom"});
-		$("#fastBackward").tooltip({placement: "bottom"});
-		$("#backward").tooltip({placement: "bottom"});
-		$("#forward").tooltip({placement: "bottom"});
-		$("#fastForward").tooltip({placement: "bottom"});
-		$("#end").tooltip({placement: "bottom"});
-		$("#flag").tooltip({placement: "bottom"});
-		$("#auto").tooltip({placement: "bottom"});
+		$("#begin, #fastBackward, #backward, #forward, #fastForward, #end, #flag, #auto").tooltip({placement: "bottom"});
 	}
 
 
@@ -199,39 +192,41 @@ var cago = (function($){
 	{
 		var metaEnd = data.indexOf(";B");
 
-		var i = 0;
+		var i = 0
+		var t, result, d;
 		for(var me = metaEnd - 1; i < me; i++)
 		{
-			var t = data.substring(i, i + 2).toUpperCase();
+			t = data.substring(i, i + 2).toUpperCase();
 			if($.inArray(t, TOKEN_LIST) != -1 || $.inArray(t, OPTIONAL_TOKEN_LIST) != -1)
 			{
 				if(data[i + 2] === "[") // Have to check this is a token with '[', or it may be a normal string
 				{
-					var result = getTokenData(data, i + 3);
-					var d = result[0];
+					result = getTokenData(data, i + 3);
+					d = result[0];
 					i = result[1];
 					metaList[t] = d;
 				}
 			}
 		}
 
+		var x, y, move, color;
 		for(; i < data.length; i++)
 		{
-			var t = data.substring(i, i + 2).toUpperCase();
+			t = data.substring(i, i + 2).toUpperCase();
 			if(t === ";B" || t === ";W")
 			{
-				var result = getTokenData(data, i + 3);
-				var d = result[0];
+				result = getTokenData(data, i + 3);
+				d = result[0];
 				if(d == "") continue;
 				i = result[1];
 
-				var color = -1;
+				color = -1;
 				if(t === ";B") color = 1;
 				else if(t === ";W") color = 0;
 
-				var x = d.charCodeAt(0) - "a".charCodeAt(0) + 1;
-				var y = d.charCodeAt(1) - "a".charCodeAt(0) + 1;
-				var move = new Move(x, y);
+				x = d.charCodeAt(0) - "a".charCodeAt(0) + 1;
+				y = d.charCodeAt(1) - "a".charCodeAt(0) + 1;
+				move = new Move(x, y);
 				map[x][y].color = color;
 				map[x][y].num = goMap.count;
 				findDeadStone(map, x, y);
@@ -403,10 +398,11 @@ var cago = (function($){
 	{
 		m[x][y].color = -2; // Tag to avoid traversing the same position twice.
 
+		var xx, yy;
 		for(var i in STEP_VECTOR)
 		{
-			var xx = x + STEP_VECTOR[i][0];
-			var yy = y + STEP_VECTOR[i][1];
+			xx = x + STEP_VECTOR[i][0];
+			yy = y + STEP_VECTOR[i][1];
 			if(m[xx][yy].color === 1 - color)
 			{
 				traverse(m, xx, yy, color, dead);
@@ -432,10 +428,11 @@ var cago = (function($){
 		m[x][y].color = -1;
 		m[x][y].num = -1;
 
+		var xx, yy;
 		for(var i in STEP_VECTOR)
 		{
-			var xx = x + STEP_VECTOR[i][0];
-			var yy = y + STEP_VECTOR[i][1];
+			xx = x + STEP_VECTOR[i][0];
+			yy = y + STEP_VECTOR[i][1];
 
 			if(m[xx][yy].color === 1 - color)
 			{
@@ -453,7 +450,8 @@ var cago = (function($){
 		ctx.beginPath();
 		ctx.fillStyle = "#D6B66F";
 		ctx.fillRect(0, 0, WIDTH, HEIGHT);
-		for(var i = 1, wts = WIDTH - TS, hts = HEIGHT - TS; i < FS; i++)
+		var wts = WIDTH - TS, hts = HEIGHT - TS;
+		for(var i = 1; i < FS; i++)
 		{
 			ctx.moveTo(TS, SPACE * (i + 1));
 			ctx.lineTo(wts, SPACE * (i + 1));
@@ -468,15 +466,17 @@ var cago = (function($){
 		ctx.fillStyle = "black";
 		ctx.font = "bold 12px sans-serif";
 		ctx.textBaseline = "bottom";
-		for(var i = 1, ss = SPACE + SPACE * 0.25, hs = HEIGHT - SPACE * 0.5, ws = WIDTH - SPACE, s3 = SPACE >> 3; i < FS; i++)
+		var ss = SPACE + (SPACE * 0.25), hs = HEIGHT - (SPACE * 0.5), ws = WIDTH - SPACE, s3 = SPACE >> 3, 
+			byteCode = "A".charCodeAt(0), code, t1;
+		for(var i = 1; i < FS; i++)
 		{
-			var baseCode = "A".charCodeAt(0);
-			var code = baseCode + i - 1;
+			baseCode = "A".charCodeAt(0);
+			code = baseCode + i - 1;
 
 			ctx.fillText(String.fromCharCode(code), SPACE * (i + 0.75), ss);
 			ctx.fillText(String.fromCharCode(code), SPACE * (i + 0.75), hs);
 
-			var t1 = SPACE * (i + 1.25);
+			t1 = SPACE * (i + 1.25);
 			if(i < 11)
 			{
 				ctx.fillText(String(20 - i), s3, t1);
@@ -521,11 +521,12 @@ var cago = (function($){
 		{
 			// I try to seperate into two for loops to reduce fillStyle change
 			// But the performance is the same, I think getCurrentMapCellColor and redundent for loop still reduce performance
+			var c;
 			for(var i = 1; i < FS; i++)
 			{
 				for(var j = 1; j < FS; j++)
 				{
-					var c = goMap.getCurrentMapCellColor(i, j);
+					c = goMap.getCurrentMapCellColor(i, j);
 					if(c === 0)
 					{
 						ctx.fillStyle = "white";
@@ -564,11 +565,12 @@ var cago = (function($){
 			var s625 = SPACE * 0.625;
 
 			ctx.font = "10px sans-serif";
+			var c, fix, num;
 			for(var i = 0; i < FS; i++)
 			{
 				for(var j = 0; j < FS; j++)
 				{
-					var c = exGoMap.count != 0 ? exGoMap.mapList[exGoMap.count - 1][i][j].color : goMap.getCurrentMapCellColor(i, j);
+					c = exGoMap.count != 0 ? exGoMap.mapList[exGoMap.count - 1][i][j].color : goMap.getCurrentMapCellColor(i, j);
 					if(c === 0 || c === 1)
 					{
 						ctx.beginPath();
@@ -582,8 +584,8 @@ var cago = (function($){
 							ctx.fillStyle = "white";
 						}
 
-						var fix = 0;
-						var num = exGoMap.count != 0 ? exGoMap.mapList[exGoMap.count - 1][i][j].num : goMap.getCurrentMapCellNum(i, j);
+						fix = 0;
+						num = exGoMap.count != 0 ? exGoMap.mapList[exGoMap.count - 1][i][j].num : goMap.getCurrentMapCellNum(i, j);
 						if(num >= 100)
 						{ 
 							fix = S;
