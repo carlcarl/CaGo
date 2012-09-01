@@ -29,6 +29,8 @@ var cago = (function($){
 	var exGoMap; // Store the steps made by user click
 	var metaList; // Store file meta info 
 	var map;
+	var canvas;
+	var tmpCanvas; // For pre-rendering
 
 	function GoMap()
 	{
@@ -442,8 +444,7 @@ var cago = (function($){
 	 */
 	function paint()
 	{
-		var c = document.getElementById("myCanvas");
-		var ctx = c.getContext("2d");
+		var ctx = tmpCanvas.getContext("2d");
 
 		// Draw color and lines of the board
 		ctx.beginPath();
@@ -515,7 +516,8 @@ var cago = (function($){
 		}
 		else
 		{
-			// Draw stone
+			// I try to seperate into two for loops to reduce fillStyle change
+			// But the performance is the same, I think getCurrentMapCellColor and redundent for loop still reduce performance
 			for(var i = 1; i < FS; i++)
 			{
 				for(var j = 1; j < FS; j++)
@@ -601,6 +603,8 @@ var cago = (function($){
 				}
 			}
 		}
+		var context = canvas.getContext("2d");
+		context.drawImage(tmpCanvas, 0, 0);
 	}
 
 	/*
@@ -705,6 +709,12 @@ var cago = (function($){
 				else map[i][j] = new MapMove(-1, 0);
 			}
 		}
+		canvas = document.getElementById("myCanvas");
+		canvas.width = BASE + BASE / 10;
+		canvas.height = canvas.width;
+		tmpCanvas = document.createElement("canvas");
+		tmpCanvas.width = canvas.width;
+		tmpCanvas.height = canvas.width;
 
 		readData(data);
 
