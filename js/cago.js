@@ -8,6 +8,11 @@ var cago = (function($){
 	var displayNum = false;
 	var auto = false;
 
+	// DOM
+	var canvas;
+	var tmpCanvas; // For pre-rendering
+	var btn; // Store all the buttons in the html
+
 	// Program const variable
 	var WIDTH = BASE + (BASE / 10);
 	var HEIGHT = WIDTH; 
@@ -29,8 +34,6 @@ var cago = (function($){
 	var exGoMap; // Store the steps made by user click
 	var metaList; // Store file meta info 
 	var map;
-	var canvas;
-	var tmpCanvas; // For pre-rendering
 
 	function GoMap()
 	{
@@ -244,8 +247,8 @@ var cago = (function($){
 	 */
 	function putGo(e)
 	{
-		var x = e.pageX - $("#myCanvas").offset().left;
-		var y = e.pageY - $("#myCanvas").offset().top;
+		var x = e.pageX - canvas.offset().left;
+		var y = e.pageY - canvas.offset().top;
 		x -= TS;
 		y -= TS;
 
@@ -559,6 +562,8 @@ var cago = (function($){
 			var s85 = SPACE * 0.85;
 			var s75 = SPACE * 0.75;
 			var s625 = SPACE * 0.625;
+
+			ctx.font = "10px sans-serif";
 			for(var i = 0; i < FS; i++)
 			{
 				for(var j = 0; j < FS; j++)
@@ -576,7 +581,6 @@ var cago = (function($){
 						{
 							ctx.fillStyle = "white";
 						}
-						ctx.font = "10px sans-serif";
 
 						var fix = 0;
 						var num = exGoMap.count != 0 ? exGoMap.mapList[exGoMap.count - 1][i][j].num : goMap.getCurrentMapCellNum(i, j);
@@ -603,7 +607,7 @@ var cago = (function($){
 				}
 			}
 		}
-		var context = canvas.getContext("2d");
+		var context = canvas[0].getContext("2d");
 		context.drawImage(tmpCanvas, 0, 0);
 	}
 
@@ -616,50 +620,49 @@ var cago = (function($){
 	{
 		if(auto === true) 
 		{
-			document.getElementById("begin").disabled = auto;
-			document.getElementById("backward").disabled = auto;
-			document.getElementById("fastBackward").disabled = auto;
-			document.getElementById("end").disabled = auto;
-			document.getElementById("forward").disabled = auto;
-			document.getElementById("fastForward").disabled = auto;
+			btn.begin.prop("disabled", auto);
+			btn.backward.prop("disabled", auto);
+			btn.fastBackward.prop("disabled", auto);
+			btn.end.prop("disabled", auto);
+			btn.forward.prop("disabled", auto);
+			btn.fastForward.prop("disabled", auto);
 			return;
 		}
 
 		if((goMap.index === 0) && (exGoMap.count === 0)) 
 		{ 
-			document.getElementById("begin").disabled = true;
-			$("#begin").tooltip("hide");
-			document.getElementById("backward").disabled = true;
-			$("#backward").tooltip("hide");
-			document.getElementById("fastBackward").disabled = true;
-			$("#fastBackward").tooltip("hide");
+			btn.begin.prop("disabled", true);
+			btn.begin.tooltip("hide");
+			btn.backward.prop("disabled", true);
+			btn.backward.tooltip("hide");
+			btn.fastBackward.prop("disabled", true);
+			btn.fastBackward.tooltip("hide");
 
-			document.getElementById("end").disabled = false;
-			document.getElementById("forward").disabled = false;
-			document.getElementById("fastForward").disabled = false;
+			btn.end.prop("disabled", false);
+			btn.forward.prop("disabled", false);
+			btn.fastForward.prop("disabled", false);
 		}
 		else if((goMap.index === goMap.count - 1) || (exGoMap.count > 0)) 
 		{
-			document.getElementById("begin").disabled = false;
-			document.getElementById("backward").disabled = false;
-			document.getElementById("fastBackward").disabled = false;
+			btn.begin.prop("disabled", false);
+			btn.backward.prop("disabled", false);
+			btn.fastBackward.prop("disabled", false);
 
-			document.getElementById("end").disabled = true;
-			$("#end").tooltip("hide");
-			document.getElementById("forward").disabled = true;
-			$("#forward").tooltip("hide");
-			document.getElementById("fastForward").disabled = true;
-			$("#fastForward").tooltip("hide");
+			btn.end.prop("disabled", true);
+			btn.end.tooltip("hide");
+			btn.forward.prop("disabled", true);
+			btn.forward.tooltip("hide");
+			btn.fastForward.prop("disabled", true);
+			btn.fastForward.tooltip("hide");
 		}
 		else
 		{
-			// TODO: Improve this in the future zzz
-			document.getElementById("begin").disabled = false;
-			document.getElementById("backward").disabled = false;
-			document.getElementById("fastBackward").disabled = false;
-			document.getElementById("end").disabled = false;
-			document.getElementById("forward").disabled = false;
-			document.getElementById("fastForward").disabled = false;
+			btn.begin.prop("disabled", false);
+			btn.backward.prop("disabled", false);
+			btn.fastBackward.prop("disabled", false);
+			btn.end.prop("disabled", false);
+			btn.forward.prop("disabled", false);
+			btn.fastForward.prop("disabled", false);
 		}
 	}
 
@@ -668,14 +671,14 @@ var cago = (function($){
 	 */
 	function addButtonEvent()
 	{
-		$("#begin").click(API.begin);
-		$("#fastBackward").click(function(){API.backward(FAST_STEP_NUM);});
-		$("#backward").click(function(){API.backward(1);});
-		$("#forward").click(function(){API.forward(1);});
-		$("#fastForward").click(function(){API.forward(FAST_STEP_NUM);});
-		$("#end").click(API.end);
-		$("#flag").click(API.flag);
-		$("#auto").click(API.setAuto);
+		btn.begin.click(API.begin);
+		btn.fastBackward.click(function(){API.backward(FAST_STEP_NUM);});
+		btn.backward.click(function(){API.backward(1);});
+		btn.forward.click(function(){API.forward(1);});
+		btn.fastForward.click(function(){API.forward(FAST_STEP_NUM);});
+		btn.end.click(API.end);
+		btn.flag.click(API.flag);
+		btn.auto.click(API.setAuto);
 	}
 
 	/*
@@ -709,12 +712,23 @@ var cago = (function($){
 				else map[i][j] = new MapMove(-1, 0);
 			}
 		}
-		canvas = document.getElementById("myCanvas");
-		canvas.width = BASE + BASE / 10;
-		canvas.height = canvas.width;
+
+		canvas = $("#myCanvas");
+		canvas[0].width = WIDTH;
+		canvas[0].height = WIDTH;
 		tmpCanvas = document.createElement("canvas");
-		tmpCanvas.width = canvas.width;
-		tmpCanvas.height = canvas.width;
+		tmpCanvas.width = WIDTH;
+		tmpCanvas.height = WIDTH;
+
+		btn = new Object();
+		btn.begin = $("#begin");
+		btn.backward = $("#backward");
+		btn.fastBackward = $("#fastBackward");
+		btn.end= $("#end");
+		btn.forward= $("#forward");
+		btn.fastForward= $("#fastForward");
+		btn.flag = $("#flag");
+		btn.auto = $("#auto");
 
 		readData(data);
 
@@ -729,7 +743,7 @@ var cago = (function($){
 		addToolTip();
 		changeButtonState();
 		addButtonEvent();
-		$("#myCanvas").click(putGo); // Use jQuery to work with IE
+		canvas.click(putGo); // Use jQuery to work with IE
 	}
 
 	/*
@@ -822,11 +836,11 @@ var cago = (function($){
 			auto = !auto;
 			if(auto === true)
 			{
-				$("#myCanvas").off("click");
+				canvas.off("click");
 			}
 			else
 			{
-				$("#myCanvas").click(putGo);
+				canvas.click(putGo);
 			}
 			changeButtonState();
 			autoPlay();
