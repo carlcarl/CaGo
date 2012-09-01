@@ -10,7 +10,9 @@ var cago = (function($){
 
 	// DOM
 	var canvas;
-	var tmpCanvas; // For pre-rendering
+	var context; // The context of canvas
+	var tmpCanvas; // Canvas for pre-rendering
+	var ctx; // The context of tmpCanvas
 	var btn; // Store all the buttons in the html
 
 	// Program const variable
@@ -447,8 +449,6 @@ var cago = (function($){
 	 */
 	function paint()
 	{
-		var ctx = tmpCanvas.getContext("2d");
-
 		// Draw color and lines of the board
 		ctx.beginPath();
 		ctx.fillStyle = "#D6B66F";
@@ -607,7 +607,6 @@ var cago = (function($){
 				}
 			}
 		}
-		var context = canvas[0].getContext("2d");
 		context.drawImage(tmpCanvas, 0, 0);
 	}
 
@@ -716,9 +715,11 @@ var cago = (function($){
 		canvas = $("#myCanvas");
 		canvas[0].width = WIDTH;
 		canvas[0].height = WIDTH;
+		context = canvas[0].getContext("2d");
 		tmpCanvas = document.createElement("canvas");
 		tmpCanvas.width = WIDTH;
 		tmpCanvas.height = WIDTH;
+		ctx = tmpCanvas.getContext("2d");
 
 		btn = new Object();
 		btn.begin = $("#begin");
