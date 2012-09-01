@@ -1,30 +1,34 @@
 var cago = (function($){
 
 	// Your setting variable
-	var base = 400; // board base width
+	var BASE = 400; // Base width of board
 	var SIZE = 19;
-	var fastStepNum = 10; // one click with 10 steps
-	var timeInterval = 2000; // 2000ms
-
-	// Program variable
-	var width = base + (base / 10);
-	var height = width; 
-	var space = base / 20;
-	var FIXED_SIZE = SIZE + 2;
-	var tokenList = ["PW", "PB", "RE", "DT", "KM"];
-	var optionalTokenList = ["WR", "BR"];
-	var stepVector = [[0, 1], [1, 0], [-1, 0], [0, -1]]; // Used for easy traverse and find dead stones
+	var FAST_STEP_NUM = 10; // One click with 10 steps
+	var TIME_INTERVAL= 2000; // 2000ms
 	var displayNum = false;
 	var auto = false;
-	var metaList = new Array(); // Store file meta info 
-	var map = new Array(FIXED_SIZE);
-	var twoSpace = space << 1;
+
+	// Program const variable
+	var WIDTH = BASE + (BASE / 10);
+	var HEIGHT = WIDTH; 
+	var SPACE = BASE / 20;
+	var FIXED_SIZE = SIZE + 2;
+	var TOKEN_LIST = ["PW", "PB", "RE", "DT", "KM"]; // The token needed to be found in the gibo file
+	var OPTIONAL_TOKEN_LIST = ["WR", "BR"];
+	var STEP_VECTOR = [[0, 1], [1, 0], [-1, 0], [0, -1]]; // Used for easy traverse and find dead stones
 
 	// Improve performance
 	var FS = FIXED_SIZE - 1;
-	var S = space >> 1;
-	var S2 = space >> 2;
+	var S = SPACE >> 1;
+	var S2 = SPACE >> 2;
+	var TS = SPACE << 1;
 	var MP = Math.PI * 2; // Cannot use <<, this will cause error
+
+	// Data structure
+	var goMap;
+	var exGoMap; // Store the steps made by user click
+	var metaList; // Store file meta info 
+	var map;
 
 	function GoMap()
 	{
@@ -33,6 +37,12 @@ var cago = (function($){
 		this.mapList = new Array();
 		this.moveList = new Array();
 	}
+	/*
+	 * Insert move
+	 *
+	 * @param {Array} m 2D array of MapMove object which include processed information of 'move'
+	 * @param {Move} move Move object
+	 */
 	GoMap.prototype.insert = function(m, move)
 	{
 		this.insertMap(m);
@@ -47,6 +57,11 @@ var cago = (function($){
 	{
 		this.moveList.push(move);
 	}
+	/*
+	 * Remove n maps, this function only be used with exGoMap
+	 *
+	 * @param {Int} n number of maps to be removed
+	 */
 	GoMap.prototype.remove = function(n)
 	{
 		for(var i = 0; i < n; i++)
@@ -60,6 +75,9 @@ var cago = (function($){
 			this.count--;
 		}
 	}
+	/*
+	 * @return {Array} Return current map(2D array) of MapMove object
+	 */
 	GoMap.prototype.getCurrentMap = function()
 	{
 		return this.mapList[this.index];
@@ -68,14 +86,23 @@ var cago = (function($){
 	{
 		return this.mapList[this.index][i][j].color;
 	}
+	/*
+	 * @return {Move} Return current move
+	 */
 	GoMap.prototype.getCurrentMove = function()
 	{
 		return this.moveList[this.index];
 	}
+	/*
+	 * @return {Int} Return the step number of the position of current mapList
+	 */
 	GoMap.prototype.getCurrentMapCellNum = function(i, j)
 	{
 		return this.mapList[this.index][i][j].num;
 	}
+	/*
+	 * Just put a empty map as the first map
+	 */
 	GoMap.prototype.insertEmptyMap = function()
 	{
 		var map = new Array(FIXED_SIZE);
@@ -90,41 +117,41 @@ var cago = (function($){
 		}
 		this.insert(map, new Move(0, 0));
 	}
-	var goMap = new GoMap();
-	goMap.insertEmptyMap();
-	var exGoMap = new GoMap();
 
+	/*
+	 * A unit in GoMap.mapList
+	 */
 	function MapMove(t, n)
 	{
 		this.color = t;
 		this.num = n;
 	}
 
+	/*
+	 * A unit in GoMap.moveList
+	 */
 	function Move(x, y)
 	{
 		this.x = x;
 		this.y = y;
 	}
 
-	for(var i = 0; i < FIXED_SIZE; i++)
-	{
-		map[i] = new Array(FIXED_SIZE);
-		for(var j = 0; j < FIXED_SIZE; j++)
-		{
-			if(i === 0 || i === FS || j === 0 || j === FS) map[i][j] = new MapMove(-2, 0);
-			else map[i][j] = new MapMove(-1, 0);
-		}
-	}
 
-	// My Bool object to check dead stone
+	/* 
+	 * My Bool object to check dead stone
+	 */
 	function Dead(v)
 	{
 		this.value = v;
 	}
 
+
 	/*
-	* Return a clone of the 2d array
-	*/
+	 * Copy a 2D array with FIXED_SIZE
+	 *
+	 * @param {Array} m A 2D array of MapMove object
+	 * @return {Array} Returns a clone of the 2D array of MapMove object
+	 */
 	function copyMap(m)
 	{
 		var tmpMap = new Array(FIXED_SIZE);
@@ -140,6 +167,9 @@ var cago = (function($){
 
 	}
 
+	/*
+	 * Add tooltip to these buttons
+	 */
 	function addToolTip()
 	{
 		$("#begin").tooltip({placement: "bottom"});
@@ -155,6 +185,8 @@ var cago = (function($){
 
 	/*
 	* Parse the gibo data
+	*
+	* @param {String} data The data string in the gibo file
 	*/
 	function readData(data)
 	{
@@ -164,9 +196,9 @@ var cago = (function($){
 		for(var me = metaEnd - 1; i < me; i++)
 		{
 			var t = data.substring(i, i + 2).toUpperCase();
-			if($.inArray(t, tokenList) != -1 || $.inArray(t, optionalTokenList) != -1)
+			if($.inArray(t, TOKEN_LIST) != -1 || $.inArray(t, OPTIONAL_TOKEN_LIST) != -1)
 			{
-				if(data[i + 2] === "[") // 要確定接下來是'['不然可能是一般字串 
+				if(data[i + 2] === "[") // Have to check this is a token with '[', or it may be a normal string
 				{
 					var result = getTokenData(data, i + 3);
 					var d = result[0];
@@ -202,18 +234,24 @@ var cago = (function($){
 		}
 	}
 
+	/*
+	 * When you click on the board, the function will process it 
+	 * and paint the stone on the board.
+	 *
+	 * @param {MouseEvent} e mouse event
+	 */
 	function putGo(e)
 	{
 		var x = e.pageX - $("#myCanvas").offset().left;
 		var y = e.pageY - $("#myCanvas").offset().top;
-		x -= twoSpace;
-		y -= twoSpace;
+		x -= TS;
+		y -= TS;
 
-		if(x < 0 || y < 0 || x > base || y > base)
+		if(x < 0 || y < 0 || x > BASE || y > BASE)
 			return;
-		var moveX = (x / space) + 1;
+		var moveX = (x / SPACE) + 1;
 		var baseMoveX = Math.floor(moveX);
-		var moveY = (y / space) + 1;
+		var moveY = (y / SPACE) + 1;
 		var baseMoveY = Math.floor(moveY);
 
 		// Check the position belong to where 
@@ -269,8 +307,12 @@ var cago = (function($){
 	}
 
 	/*
-	* return an array with [0]:token data, [1]: the index after the token data
-	*/
+	 * Get the data with the token
+	 *
+	 * @param {String} data the data string in the gibo file
+	 * @param {Int} index The current index in the data string
+	 * @return {Array} Returns an array with [0]:token data, [1]: the index after the token data
+	 */
 	function getTokenData(data, index)
 	{
 		var i = index;
@@ -290,6 +332,10 @@ var cago = (function($){
 	/*
 	* Find dead stone groups from 4 sides
 	* If found, delete them
+	*
+	* @param {Array} m 2D array of MapMove object
+	* @param {Int} x The first index of m
+	* @param {Int} y The second index of m
 	*/
 	function findDeadStone(map, x, y)
 	{
@@ -339,20 +385,26 @@ var cago = (function($){
 
 	/*
 	* Recursive traverse to find dead stones
+	*
+	* @param {Array} m 2D array of MapMove object
+	* @param {Int} x The first index of m
+	* @param {Int} y The second index of m
+	* @param {Int} color The color of the stone you put, so the function has to traverse the other color
+	* @param {Dead} dead A boolean object to check if the stones are dead
 	*/
 	function traverse(m, x, y, color, dead)
 	{
 		m[x][y].color = -2; // Tag to avoid traversing the same position twice.
 
-		for(var i in stepVector)
+		for(var i in STEP_VECTOR)
 		{
-			var xx = x + stepVector[i][0];
-			var yy = y + stepVector[i][1];
+			var xx = x + STEP_VECTOR[i][0];
+			var yy = y + STEP_VECTOR[i][1];
 			if(m[xx][yy].color === 1 - color)
 			{
 				traverse(m, xx, yy, color, dead);
 			}
-			else if(m[xx][yy].color === -1)
+			else if(m[xx][yy].color === -1) // If find empty, then the stones are alive
 			{
 				dead.value = false;
 				return;
@@ -362,16 +414,21 @@ var cago = (function($){
 
 	/*
 	* Recursive delete stones
+	*
+	* @param {Array} m 2D array of MapMove object
+	* @param {Int} x The first index of m
+	* @param {Int} y The second index of m
+	* @param {Int} color The color of the stone you put, so the function has to traverse the other color
 	*/
 	function deleteDeadStone(m, x, y, color)
 	{
 		m[x][y].color = -1;
 		m[x][y].num = -1;
 
-		for(var i in stepVector)
+		for(var i in STEP_VECTOR)
 		{
-			var xx = x + stepVector[i][0];
-			var yy = y + stepVector[i][1];
+			var xx = x + STEP_VECTOR[i][0];
+			var yy = y + STEP_VECTOR[i][1];
 
 			if(m[xx][yy].color === 1 - color)
 			{
@@ -380,6 +437,9 @@ var cago = (function($){
 		}
 	}
 
+	/*
+	 * Paint the whole board!
+	 */
 	function paint()
 	{
 		var c = document.getElementById("myCanvas");
@@ -388,13 +448,13 @@ var cago = (function($){
 		// Draw color and lines of the board
 		ctx.beginPath();
 		ctx.fillStyle = "#D6B66F";
-		ctx.fillRect(0, 0, width, height);
-		for(var i = 1, wts = width - twoSpace, hts = height - twoSpace; i < FS; i++)
+		ctx.fillRect(0, 0, WIDTH, HEIGHT);
+		for(var i = 1, wts = WIDTH - TS, hts = HEIGHT - TS; i < FS; i++)
 		{
-			ctx.moveTo(twoSpace, space * (i + 1));
-			ctx.lineTo(wts, space * (i + 1));
-			ctx.moveTo(space * (i + 1), twoSpace);
-			ctx.lineTo(space * (i + 1), hts);
+			ctx.moveTo(TS, SPACE * (i + 1));
+			ctx.lineTo(wts, SPACE * (i + 1));
+			ctx.moveTo(SPACE * (i + 1), TS);
+			ctx.lineTo(SPACE * (i + 1), hts);
 		}
 		ctx.stroke();
 		ctx.closePath();
@@ -404,15 +464,15 @@ var cago = (function($){
 		ctx.fillStyle = "black";
 		ctx.font = "bold 12px sans-serif";
 		ctx.textBaseline = "bottom";
-		for(var i = 1, ss = space + space * 0.25, hs = height - space * 0.5, ws = width - space, s3 = space >> 3; i < FS; i++)
+		for(var i = 1, ss = SPACE + SPACE * 0.25, hs = HEIGHT - SPACE * 0.5, ws = WIDTH - SPACE, s3 = SPACE >> 3; i < FS; i++)
 		{
 			var baseCode = "A".charCodeAt(0);
 			var code = baseCode + i - 1;
 
-			ctx.fillText(String.fromCharCode(code), space * (i + 0.75), ss);
-			ctx.fillText(String.fromCharCode(code), space * (i + 0.75), hs);
+			ctx.fillText(String.fromCharCode(code), SPACE * (i + 0.75), ss);
+			ctx.fillText(String.fromCharCode(code), SPACE * (i + 0.75), hs);
 
-			var t1 = space * (i + 1.25);
+			var t1 = SPACE * (i + 1.25);
 			if(i < 11)
 			{
 				ctx.fillText(String(20 - i), s3, t1);
@@ -446,7 +506,7 @@ var cago = (function($){
 					if(exGoMap.mapList[c][i][j].color === 0 || exGoMap.mapList[c][i][j].color === 1)
 					{
 						ctx.beginPath();
-						ctx.arc(space * ( i + 1 ), space * (j + 1), S, 0, MP, true);
+						ctx.arc(SPACE * ( i + 1 ), SPACE * (j + 1), S, 0, MP, true);
 						ctx.fill();
 						ctx.closePath();
 					}
@@ -473,7 +533,7 @@ var cago = (function($){
 					if(c === 0 || c === 1)
 					{
 						ctx.beginPath();
-						ctx.arc(space * i + space, space * (j + 1), S, 0, MP, true);
+						ctx.arc(SPACE * i + SPACE, SPACE * (j + 1), S, 0, MP, true);
 						ctx.fill();
 						ctx.closePath();
 					}
@@ -487,16 +547,16 @@ var cago = (function($){
 			ctx.fillStyle = "red";
 			ctx.beginPath();
 			var m = goMap.getCurrentMove();
-			ctx.arc(space * (m.x + 1), space * (m.y + 1), S2, 0, MP, true);
+			ctx.arc(SPACE * (m.x + 1), SPACE * (m.y + 1), S2, 0, MP, true);
 			ctx.fill();
 			ctx.closePath();
 
 		}
 		if(displayNum)
 		{
-			var s85 = space * 0.85;
-			var s75 = space * 0.75;
-			var s625 = space * 0.625;
+			var s85 = SPACE * 0.85;
+			var s75 = SPACE * 0.75;
+			var s625 = SPACE * 0.625;
 			for(var i = 0; i < FS; i++)
 			{
 				for(var j = 0; j < FS; j++)
@@ -535,7 +595,7 @@ var cago = (function($){
 						{
 							fix = s75;
 						}
-						ctx.fillText(num, space * i + fix, space * (j + 1.25));
+						ctx.fillText(num, SPACE * i + fix, SPACE * (j + 1.25));
 						ctx.closePath();
 					}
 				}
@@ -543,6 +603,11 @@ var cago = (function($){
 		}
 	}
 
+	/*
+	 * Enable or disable the buttons according to 
+	 * 1. auto setting
+	 * 2. If at the begin or end
+	 */
 	function changeButtonState()
 	{
 		if(auto === true) 
@@ -600,28 +665,47 @@ var cago = (function($){
 	function addButtonEvent()
 	{
 		$("#begin").click(API.begin);
-		$("#fastBackward").click(function(){API.backward(10);});
+		$("#fastBackward").click(function(){API.backward(FAST_STEP_NUM);});
 		$("#backward").click(function(){API.backward(1);});
 		$("#forward").click(function(){API.forward(1);});
-		$("#fastForward").click(function(){API.forward(10);});
+		$("#fastForward").click(function(){API.forward(FAST_STEP_NUM);});
 		$("#end").click(API.end);
 		$("#flag").click(API.flag);
 		$("#auto").click(API.setAuto);
 	}
 
-	// Called by API.setAuto
+	/*
+	 * Called by API.setAuto
+	 */
 	function autoPlay()
 	{
 		if(auto && goMap.index < goMap.count - 1)
 		{
 			API.forward(1);
-			setTimeout(function(){autoPlay();}, timeInterval);
+			setTimeout(function(){autoPlay();}, TIME_INTERVAL);
 		}
 	}
 
-	// Main process
+	/*
+	 * Main process
+	 */
 	function main(data)
 	{
+		goMap = new GoMap();
+		goMap.insertEmptyMap();
+		exGoMap = new GoMap();
+		metaList = new Array();
+		map = new Array(FIXED_SIZE);
+		for(var i = 0; i < FIXED_SIZE; i++)
+		{
+			map[i] = new Array(FIXED_SIZE);
+			for(var j = 0; j < FIXED_SIZE; j++)
+			{
+				if(i === 0 || i === FS || j === 0 || j === FS) map[i][j] = new MapMove(-2, 0);
+				else map[i][j] = new MapMove(-1, 0);
+			}
+		}
+
 		readData(data);
 
 		// Add meta info in web page
@@ -638,14 +722,24 @@ var cago = (function($){
 		$("#myCanvas").click(putGo); // Use jQuery to work with IE
 	}
 
-	// Public API
+	/*
+	 * Public API
+	 */
 	var API = {
 
+		/*
+		 * Ajax get gibo file then execute main function
+		 *
+		 * @param filePath {String} filePath The path of gibo file
+		 */
 		"go" : function(filePath)
 		{
-			$.get(filePath, main);
+			$.get(filePath).done(main);
 		},
 
+		/*
+		 * Move to the beginning of the game
+		 */
 		"begin" : function()
 		{
 			goMap.index = 0;
@@ -654,6 +748,11 @@ var cago = (function($){
 			paint();
 		},
 
+		/*
+		 * Backward num steps
+		 *
+		 * @param {Int} num The number of steps
+		 */
 		"backward" : function(num)
 		{
 			if(exGoMap.count <= 0)
@@ -671,6 +770,11 @@ var cago = (function($){
 			paint();
 		},
 
+		/*
+		 * Forward num steps
+		 *
+		 * @param {Int} num The number of steps
+		 */
 		"forward" : function(num)
 		{
 			if(goMap.index === goMap.count - 1) return;
@@ -681,6 +785,9 @@ var cago = (function($){
 			paint();
 		},
 
+		/*
+		 * Move to the end of the game
+		 */
 		"end" : function()
 		{
 			goMap.index = goMap.count - 1;
@@ -689,14 +796,17 @@ var cago = (function($){
 		},
 
 		/*
-		* Display step number or not
-		*/
+		 * Display step number or not
+		 */
 		"flag" : function()
 		{
 			displayNum = !displayNum;
 			paint();
 		},
 
+		/*
+		 * Set auto play or not
+		 */
 		"setAuto" : function()
 		{
 			auto = !auto;
