@@ -467,10 +467,9 @@ var cago = (function($){
 		ctx.font = "bold 12px sans-serif";
 		ctx.textBaseline = "bottom";
 		var ss = SPACE + (SPACE * 0.25), hs = HEIGHT - (SPACE * 0.5), ws = WIDTH - SPACE, s3 = SPACE >> 3, 
-			byteCode = "A".charCodeAt(0), code, t1;
+			baseCode = "A".charCodeAt(0), code, t1;
 		for(var i = 1; i < FS; i++)
 		{
-			baseCode = "A".charCodeAt(0);
 			code = baseCode + i - 1;
 
 			ctx.fillText(String.fromCharCode(code), SPACE * (i + 0.75), ss);
