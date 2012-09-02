@@ -12,7 +12,7 @@
 		</script>
 	</head>
 	<body>
-		<div id="content" style="width: 500px; margin: 5px;">
+		<div id="container" style="width: 500px; margin: 5px;">
 			<div id="toolBar" class="btn-toolbar">
 				<div class="btn-group">
 					<button id="begin" class="btn" data-original-title="第一手"><i class="icon-step-backward"></i> </button>
@@ -29,7 +29,9 @@
 					<button id="auto" class="btn" data-original-title="自動播放"><i class="icon-play-circle"></i> </button>
 				</div>
 			</div>
-			<canvas id="myCanvas" style="border:1px solid black;"></canvas>
+			<div id="content">
+				<!-- <canvas id="myCanvas" style="border:1px solid black; z-index:0; position: absolute"></canvas> -->
+			</div>
 			<table id="meta" class="table table-striped" style="width: 440px; display: none;">
 				<tr>
 					<th>持黑</th>

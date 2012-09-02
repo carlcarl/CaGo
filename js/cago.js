@@ -9,8 +9,8 @@ var cago = (function($){
 	var auto = false;
 
 	// DOM
-	var canvas;
-	var context; // The context of canvas
+	var fgCanvas, bgCanvas;
+	var fgContext, bgContext; // The context of canvas
 	var tmpCanvas; // Canvas for pre-rendering
 	var ctx; // The context of tmpCanvas
 	var btn; // Store all the buttons in the html
@@ -41,6 +41,7 @@ var cago = (function($){
 	{
 		this.count = 0;
 		this.index = 0;
+		this.prevIndex = 0;
 		this.mapList = new Array();
 		this.moveList = new Array();
 	}
@@ -106,6 +107,11 @@ var cago = (function($){
 	GoMap.prototype.getCurrentMapCellNum = function(i, j)
 	{
 		return this.mapList[this.index][i][j].num;
+	}
+
+	GoMap.prototype.getPrevMapCellColor = function(i, j)
+	{
+		return this.mapList[this.prevIndex][i][j].color;
 	}
 	/*
 	 * Just put a empty map as the first map
@@ -244,8 +250,8 @@ var cago = (function($){
 	 */
 	function putGo(e)
 	{
-		var x = e.pageX - canvas.offset().left;
-		var y = e.pageY - canvas.offset().top;
+		var x = e.pageX - fgCanvas.offset().left;
+		var y = e.pageY - fgCanvas.offset().top;
 		x -= TS;
 		y -= TS;
 
@@ -441,54 +447,57 @@ var cago = (function($){
 		}
 	}
 
-	/*
-	 * Paint the whole board!
-	 */
-	function paint()
+	function paintBoard()
 	{
 		// Draw color and lines of the board
-		ctx.beginPath();
-		ctx.fillStyle = "#D6B66F";
-		ctx.fillRect(0, 0, WIDTH, HEIGHT);
+		bgContext.beginPath();
+		bgContext.fillStyle = "#D6B66F";
+		bgContext.fillRect(0, 0, WIDTH, HEIGHT);
 		var wts = WIDTH - TS, hts = HEIGHT - TS;
 		for(var i = 1; i < FS; i++)
 		{
-			ctx.moveTo(TS, SPACE * (i + 1));
-			ctx.lineTo(wts, SPACE * (i + 1));
-			ctx.moveTo(SPACE * (i + 1), TS);
-			ctx.lineTo(SPACE * (i + 1), hts);
+			bgContext.moveTo(TS, SPACE * (i + 1));
+			bgContext.lineTo(wts, SPACE * (i + 1));
+			bgContext.moveTo(SPACE * (i + 1), TS);
+			bgContext.lineTo(SPACE * (i + 1), hts);
 		}
-		ctx.stroke();
-		ctx.closePath();
+		bgContext.stroke();
+		bgContext.closePath();
 
 		// Draw string of the board 
-		ctx.beginPath();
-		ctx.fillStyle = "black";
-		ctx.font = "bold 12px sans-serif";
-		ctx.textBaseline = "bottom";
+		bgContext.beginPath();
+		bgContext.fillStyle = "black";
+		bgContext.font = "bold 12px sans-serif";
+		bgContext.textBaseline = "bottom";
 		var ss = SPACE + (SPACE * 0.25), hs = HEIGHT - (SPACE * 0.5), ws = WIDTH - SPACE, s3 = SPACE >> 3, 
 			baseCode = "A".charCodeAt(0), code, t1;
 		for(var i = 1; i < FS; i++)
 		{
 			code = baseCode + i - 1;
 
-			ctx.fillText(String.fromCharCode(code), SPACE * (i + 0.75), ss);
-			ctx.fillText(String.fromCharCode(code), SPACE * (i + 0.75), hs);
+			bgContext.fillText(String.fromCharCode(code), SPACE * (i + 0.75), ss);
+			bgContext.fillText(String.fromCharCode(code), SPACE * (i + 0.75), hs);
 
 			t1 = SPACE * (i + 1.25);
 			if(i < 11)
 			{
-				ctx.fillText(String(20 - i), s3, t1);
-				ctx.fillText(String(20 - i), ws, t1);
+				bgContext.fillText(String(20 - i), s3, t1);
+				bgContext.fillText(String(20 - i), ws, t1);
 			}
 			else
 			{
-				ctx.fillText(String(20 - i), S, t1);
-				ctx.fillText(String(20 - i), ws, t1);
+				bgContext.fillText(String(20 - i), S, t1);
+				bgContext.fillText(String(20 - i), ws, t1);
 			}
 		}
-		ctx.closePath();
+		bgContext.closePath();
 
+	}
+	/*
+	 * Paint the whole board!
+	 */
+	function paint()
+	{
 		if(exGoMap.count != 0)
 		{
 			// Draw stone
@@ -520,12 +529,18 @@ var cago = (function($){
 		{
 			// I try to seperate into two for loops to reduce fillStyle change
 			// But the performance is the same, I think getCurrentMapCellColor and redundent for loop still reduce performance
-			var c;
+			var c, c2;
 			for(var i = 1; i < FS; i++)
 			{
 				for(var j = 1; j < FS; j++)
 				{
 					c = goMap.getCurrentMapCellColor(i, j);
+					c2 = goMap.getPrevMapCellColor(i, j);
+					if((c2 === 0 || c2 === 1) && (c === -1)) // Previous exist but now gone, so clear this part
+					{
+						ctx.drawImage(bgCanvas[0], SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE, SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE);
+						continue;
+					}
 					if(c === 0)
 					{
 						ctx.fillStyle = "white";
@@ -608,7 +623,7 @@ var cago = (function($){
 				}
 			}
 		}
-		context.drawImage(tmpCanvas, 0, 0);
+		fgContext.drawImage(tmpCanvas, 0, 0);
 	}
 
 	/*
@@ -713,10 +728,28 @@ var cago = (function($){
 			}
 		}
 
-		canvas = $("#myCanvas");
-		canvas[0].width = WIDTH;
-		canvas[0].height = WIDTH;
-		context = canvas[0].getContext("2d");
+		
+		// canvas = $("#myCanvas");
+		var content = $("#content");
+		content.css({"width": WIDTH, "height": HEIGHT});
+
+		bgCanvas = $("<canvas></canvas>");
+		bgCanvas.attr("id", "bgCanvas");
+		bgCanvas.css({"position": "absolute", "border": "1px solid black", "z-index": "0"});
+		bgCanvas[0].width = WIDTH;
+		bgCanvas[0].height = HEIGHT;
+		bgCanvas.appendTo(content);
+
+		fgCanvas = $("<canvas></canvas>");
+		fgCanvas.attr("id", "fgCanvas");
+		fgCanvas.css({"position": "absolute", "border": "1px solid black", "z-index": "1"});
+		fgCanvas[0].width = WIDTH;
+		fgCanvas[0].height = HEIGHT;
+		fgCanvas.appendTo(content);
+
+		fgContext = fgCanvas[0].getContext("2d");
+		bgContext = bgCanvas[0].getContext("2d");
+
 		tmpCanvas = document.createElement("canvas");
 		tmpCanvas.width = WIDTH;
 		tmpCanvas.height = WIDTH;
@@ -741,11 +774,12 @@ var cago = (function($){
 		}
 		$("#meta").show();
 
+		paintBoard();
 		paint();
 		addToolTip();
 		changeButtonState();
 		addButtonEvent();
-		canvas.click(putGo); // Use jQuery to work with IE
+		fgCanvas.click(putGo); // Use jQuery to work with IE
 	}
 
 	/*
@@ -768,6 +802,7 @@ var cago = (function($){
 		 */
 		"begin" : function()
 		{
+			goMap.prevIndex = goMap.index;
 			goMap.index = 0;
 			exGoMap.remove(exGoMap.count);
 			changeButtonState();
@@ -783,6 +818,7 @@ var cago = (function($){
 		{
 			if(exGoMap.count <= 0)
 			{
+				goMap.prevIndex = goMap.index;
 				if(goMap.index === 0) return;
 
 				if(goMap.index - num < 0) goMap.index = 0;
@@ -790,6 +826,7 @@ var cago = (function($){
 			}
 			else
 			{
+				exGoMap.prevIndex = exGoMap.index;
 				exGoMap.remove(num);
 			}
 			changeButtonState();
@@ -803,6 +840,7 @@ var cago = (function($){
 		 */
 		"forward" : function(num)
 		{
+			goMap.prevIndex = goMap.index;
 			if(goMap.index === goMap.count - 1) return;
 
 			if(goMap.index + num >= goMap.count) goMap.index = goMap.count - 1;
@@ -816,6 +854,7 @@ var cago = (function($){
 		 */
 		"end" : function()
 		{
+			goMap.prevIndex = goMap.index;
 			goMap.index = goMap.count - 1;
 			changeButtonState();
 			paint();
@@ -838,11 +877,11 @@ var cago = (function($){
 			auto = !auto;
 			if(auto === true)
 			{
-				canvas.off("click");
+				fgCanvas.off("click");
 			}
 			else
 			{
-				canvas.click(putGo);
+				fgCanvas.click(putGo);
 			}
 			changeButtonState();
 			autoPlay();
