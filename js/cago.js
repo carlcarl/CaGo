@@ -9,8 +9,8 @@ var cago = (function($){
 	var auto = false;
 
 	// DOM
-	var fgCanvas, bgCanvas;
-	var fgContext, bgContext; // The context of canvas
+	var stoneCanvas, pointCanvas, numCanvas, bgCanvas;
+	var stoneContext, pointContext, numContext, bgContext; // The context of canvas
 	var tmpCanvas; // Canvas for pre-rendering
 	var ctx; // The context of tmpCanvas
 	var btn; // Store all the buttons in the html
@@ -59,7 +59,7 @@ var cago = (function($){
 	}
 	GoMap.prototype.insertMap = function(m)
 	{
-		this.mapList[this.count] = copyMap(m);
+		this.mapList.push(copyMap(m));
 	}
 	GoMap.prototype.insertMove = function(move)
 	{
@@ -74,11 +74,11 @@ var cago = (function($){
 	{
 		for(var i = 0; i < n; i++)
 		{
-			if(this.count <= 0)
+			if(this.count <= 1) // GoMap will insert a empty map at first, so keep at least one
 			{
 				break;
 			}
-			delete this.mapList[this.count - 1];
+			this.mapList.pop();
 			this.moveList.pop();
 			this.count--;
 		}
@@ -250,8 +250,8 @@ var cago = (function($){
 	 */
 	function putGo(e)
 	{
-		var x = e.pageX - fgCanvas.offset().left;
-		var y = e.pageY - fgCanvas.offset().top;
+		var x = e.pageX - stoneCanvas.offset().left;
+		var y = e.pageY - stoneCanvas.offset().top;
 		x -= TS;
 		y -= TS;
 
@@ -271,7 +271,7 @@ var cago = (function($){
 		else return;
 
 		// First click on the board
-		if(exGoMap.count === 0)
+		if(exGoMap.index === 0)
 		{
 			var currentMove = goMap.getCurrentMove();
 
@@ -283,33 +283,34 @@ var cago = (function($){
 			else if(currentMove.x != 0 && currentMove.y != 0) // Already exist some stones on the board
 			{
 				exGoMap.insertMap(goMap.getCurrentMap());
-				exGoMap.mapList[exGoMap.count][moveX][moveY].color = 1 - goMap.getCurrentMapCellColor(currentMove.x, currentMove.y);
+				exGoMap.mapList[exGoMap.index + 1][moveX][moveY].color = 1 - goMap.getCurrentMapCellColor(currentMove.x, currentMove.y);
 			}
 			else if(currentMove.x === 0 && currentMove.y === 0) // First click without any stone on the board
 			{
 				exGoMap.insertMap(goMap.getCurrentMap());
-				exGoMap.mapList[exGoMap.count][moveX][moveY].color = 1;
+				exGoMap.mapList[exGoMap.index + 1][moveX][moveY].color = 1;
 			}
 		}
 		else
 		{
-			var tmp = exGoMap.moveList[exGoMap.count - 1];
+			var tmp = exGoMap.moveList[exGoMap.index];
 
 			// If the position I put is not empty, then ignore it
-			if(exGoMap.mapList[exGoMap.count - 1][moveX][moveY].color === 1 || exGoMap.mapList[exGoMap.count - 1][moveX][moveY].color === 0)
+			if(exGoMap.mapList[exGoMap.index][moveX][moveY].color === 1 || exGoMap.mapList[exGoMap.index][moveX][moveY].color === 0)
 			{
 				return;
 			}
 			else if(tmp.x != 0 && tmp.y != 0) 
 			{
-				exGoMap.insertMap(exGoMap.mapList[exGoMap.count - 1]);
-				exGoMap.mapList[exGoMap.count][moveX][moveY].color = 1 - exGoMap.mapList[exGoMap.count - 1][tmp.x][tmp.y].color;
+				exGoMap.insertMap(exGoMap.mapList[exGoMap.index]);
+				exGoMap.mapList[exGoMap.index + 1][moveX][moveY].color = 1 - exGoMap.mapList[exGoMap.index][tmp.x][tmp.y].color;
 			}
 		}
 
 		exGoMap.insertMove(new Move(moveX, moveY));
+		findDeadStone(exGoMap.mapList[exGoMap.index], moveX, moveY);
+		exGoMap.index++;
 		exGoMap.count++;
-		findDeadStone(exGoMap.mapList[exGoMap.count - 1], moveX, moveY);
 		changeButtonState();
 		paint();
 	}
@@ -498,24 +499,26 @@ var cago = (function($){
 	 */
 	function paint()
 	{
-		if(exGoMap.count != 0)
+		if(exGoMap.index > 0)
 		{
 			// Draw stone
-			var c = exGoMap.count - 1;
+			var index = exGoMap.index;
+			var c;
 			for(var i = 1; i < FS; i++)
 			{
 				for(var j = 1; j < FS; j++)
 				{
-					if(exGoMap.mapList[c][i][j].color === 0)
+					c = exGoMap.mapList[index][i][j].color;
+					if(c === 0)
 					{
 						ctx.fillStyle = "white";
 					}
-					else if(exGoMap.mapList[c][i][j].color === 1)
+					else if(c === 1)
 					{
 						ctx.fillStyle = "black";
 					}
 
-					if(exGoMap.mapList[c][i][j].color === 0 || exGoMap.mapList[c][i][j].color === 1)
+					if(c === 0 || c === 1)
 					{
 						ctx.beginPath();
 						ctx.arc(SPACE * ( i + 1 ), SPACE * (j + 1), S, 0, MP, true);
@@ -536,11 +539,14 @@ var cago = (function($){
 				{
 					c = goMap.getCurrentMapCellColor(i, j);
 					c2 = goMap.getPrevMapCellColor(i, j);
+
+					/* if(c2 === c) continue; */
 					if((c2 === 0 || c2 === 1) && (c === -1)) // Previous exist but now gone, so clear this part
 					{
 						ctx.drawImage(bgCanvas[0], SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE, SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE);
 						continue;
 					}
+
 					if(c === 0)
 					{
 						ctx.fillStyle = "white";
@@ -584,7 +590,7 @@ var cago = (function($){
 			{
 				for(var j = 0; j < FS; j++)
 				{
-					c = exGoMap.count != 0 ? exGoMap.mapList[exGoMap.count - 1][i][j].color : goMap.getCurrentMapCellColor(i, j);
+					c = exGoMap.index > 0 ? exGoMap.mapList[exGoMap.index][i][j].color : goMap.getCurrentMapCellColor(i, j);
 					if(c === 0 || c === 1)
 					{
 						ctx.beginPath();
@@ -599,7 +605,7 @@ var cago = (function($){
 						}
 
 						fix = 0;
-						num = exGoMap.count != 0 ? exGoMap.mapList[exGoMap.count - 1][i][j].num : goMap.getCurrentMapCellNum(i, j);
+						num = exGoMap.index > 0 ? exGoMap.mapList[exGoMap.index][i][j].num : goMap.getCurrentMapCellNum(i, j);
 						if(num >= 100)
 						{ 
 							fix = S;
@@ -623,7 +629,7 @@ var cago = (function($){
 				}
 			}
 		}
-		fgContext.drawImage(tmpCanvas, 0, 0);
+		stoneContext.drawImage(tmpCanvas, 0, 0);
 	}
 
 	/*
@@ -644,7 +650,7 @@ var cago = (function($){
 			return;
 		}
 
-		if((goMap.index === 0) && (exGoMap.count === 0)) 
+		if((goMap.index === 0) && (exGoMap.index === 0)) 
 		{ 
 			btn.begin.prop("disabled", true);
 			btn.begin.tooltip("hide");
@@ -657,7 +663,7 @@ var cago = (function($){
 			btn.forward.prop("disabled", false);
 			btn.fastForward.prop("disabled", false);
 		}
-		else if((goMap.index === goMap.count - 1) || (exGoMap.count > 0)) 
+		else if((goMap.index === goMap.count - 1) || (exGoMap.index > 0)) 
 		{
 			btn.begin.prop("disabled", false);
 			btn.backward.prop("disabled", false);
@@ -716,6 +722,7 @@ var cago = (function($){
 		goMap = new GoMap();
 		goMap.insertEmptyMap();
 		exGoMap = new GoMap();
+		exGoMap.insertEmptyMap();
 		metaList = new Array();
 		map = new Array(FIXED_SIZE);
 		for(var i = 0; i < FIXED_SIZE; i++)
@@ -740,15 +747,23 @@ var cago = (function($){
 		bgCanvas[0].height = HEIGHT;
 		bgCanvas.appendTo(content);
 
-		fgCanvas = $("<canvas></canvas>");
-		fgCanvas.attr("id", "fgCanvas");
-		fgCanvas.css({"position": "absolute", "border": "1px solid black", "z-index": "1"});
-		fgCanvas[0].width = WIDTH;
-		fgCanvas[0].height = HEIGHT;
-		fgCanvas.appendTo(content);
+		stoneCanvas = $("<canvas></canvas>");
+		stoneCanvas.attr("id", "stoneCanvas");
+		stoneCanvas.css({"position": "absolute", "border": "1px solid black", "z-index": "1"});
+		stoneCanvas[0].width = WIDTH;
+		stoneCanvas[0].height = HEIGHT;
+		stoneCanvas.appendTo(content);
 
-		fgContext = fgCanvas[0].getContext("2d");
+		// pointCanvas = $("<canvas></canvas>");
+		// pointCanvas.attr("id", "pointCanvas");
+		// pointCanvas.css({"position": "absolute", "border": "1px solid black", "z-index": "1"});
+		// pointCanvas[0].width = WIDTH;
+		// pointCanvas[0].height = HEIGHT;
+		// pointCanvas.appendTo(content);
+
+		stoneContext = stoneCanvas[0].getContext("2d");
 		bgContext = bgCanvas[0].getContext("2d");
+		// pointContext = pointCanvas[0].getContext("2d");
 
 		tmpCanvas = document.createElement("canvas");
 		tmpCanvas.width = WIDTH;
@@ -779,7 +794,7 @@ var cago = (function($){
 		addToolTip();
 		changeButtonState();
 		addButtonEvent();
-		fgCanvas.click(putGo); // Use jQuery to work with IE
+		stoneCanvas.click(putGo); // Use jQuery to work with IE
 	}
 
 	/*
@@ -804,7 +819,11 @@ var cago = (function($){
 		{
 			goMap.prevIndex = goMap.index;
 			goMap.index = 0;
-			exGoMap.remove(exGoMap.count);
+			if(exGoMap.index > 0)
+			{
+				exGoMap.remove(exGoMap.index);
+				exGoMap.index = 0;
+			}
 			changeButtonState();
 			paint();
 		},
@@ -816,18 +835,22 @@ var cago = (function($){
 		 */
 		"backward" : function(num)
 		{
-			if(exGoMap.count <= 0)
+			if(exGoMap.index <= 0)
 			{
 				goMap.prevIndex = goMap.index;
 				if(goMap.index === 0) return;
 
-				if(goMap.index - num < 0) goMap.index = 0;
+				if(goMap.index - num <= 0) goMap.index = 0;
 				else goMap.index -= num;
 			}
 			else
 			{
-				exGoMap.prevIndex = exGoMap.index;
 				exGoMap.remove(num);
+				if(exGoMap.index - num <= 0) exGoMap.index = 0;
+				else exGoMap.index -= num;
+				// Because exGoMap doesn't keep previous state, 
+				// the only method to delete the previous stones is to clear the whole canvas
+				ctx.drawImage(bgCanvas[0], 0, 0, WIDTH, HEIGHT);
 			}
 			changeButtonState();
 			paint();
@@ -877,11 +900,11 @@ var cago = (function($){
 			auto = !auto;
 			if(auto === true)
 			{
-				fgCanvas.off("click");
+				stoneCanvas.off("click");
 			}
 			else
 			{
-				fgCanvas.click(putGo);
+				stoneCanvas.click(putGo);
 			}
 			changeButtonState();
 			autoPlay();
