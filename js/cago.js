@@ -46,7 +46,7 @@ var cago = (function($){
 		this.moveList = new Array();
 	}
 	/*
-	 * Insert move
+	 * Insert move with count++
 	 *
 	 * @param {Array} m 2D array of MapMove object which include processed information of 'move'
 	 * @param {Move} move Move object
@@ -109,12 +109,17 @@ var cago = (function($){
 		return this.mapList[this.index][i][j].num;
 	}
 
+	/*
+	 * Track previous state to render changed part
+	 *
+	 * @return {Int} Return the step number of the position of previous mapList
+	 */
 	GoMap.prototype.getPrevMapCellColor = function(i, j)
 	{
 		return this.mapList[this.prevIndex][i][j].color;
 	}
 	/*
-	 * Just put a empty map as the first map
+	 * Just put a empty map as the first map, count will plus 1
 	 */
 	GoMap.prototype.insertEmptyMap = function()
 	{
