@@ -655,7 +655,7 @@ var cago = (function($){
 			return;
 		}
 
-		if((goMap.index === 0) && (exGoMap.index === 0)) 
+		if((goMap.index === 0) && (exGoMap.index === 0)) // Beginning
 		{ 
 			btn.begin.prop("disabled", true);
 			btn.begin.tooltip("hide");
@@ -667,8 +667,9 @@ var cago = (function($){
 			btn.end.prop("disabled", false);
 			btn.forward.prop("disabled", false);
 			btn.fastForward.prop("disabled", false);
+			btn.auto.prop("disabled", false);
 		}
-		else if((goMap.index === goMap.count - 1) || (exGoMap.index > 0)) 
+		else if((goMap.index === goMap.count - 1) || (exGoMap.index > 0)) // If at the end or after user put stones
 		{
 			btn.begin.prop("disabled", false);
 			btn.backward.prop("disabled", false);
@@ -680,6 +681,8 @@ var cago = (function($){
 			btn.forward.tooltip("hide");
 			btn.fastForward.prop("disabled", true);
 			btn.fastForward.tooltip("hide");
+			btn.auto.prop("disabled", true);
+			btn.auto.tooltip("hide");
 		}
 		else
 		{
@@ -689,6 +692,8 @@ var cago = (function($){
 			btn.end.prop("disabled", false);
 			btn.forward.prop("disabled", false);
 			btn.fastForward.prop("disabled", false);
+			btn.auto.prop("disabled", false);
+			btn.auto.tooltip("hide");
 		}
 	}
 
