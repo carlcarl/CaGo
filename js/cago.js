@@ -15,6 +15,7 @@ var cago = (function($){
 	var tmpCanvas; // Canvas for pre-rendering
 	var ctx; // The context of tmpCanvas
 	var btn; // Store all the buttons in the html
+	var metaTr; // tr row in metaTable which show meta data
 
 	// Program const variable
 	var WIDTH = BASE + (BASE / 10);
@@ -96,6 +97,7 @@ var cago = (function($){
 	{
 		return this.mapList[this.index][i][j].color;
 	}
+
 	/*
 	 * @return {Move} Return current move
 	 */
@@ -103,6 +105,7 @@ var cago = (function($){
 	{
 		return this.moveList[this.index];
 	}
+
 	/*
 	 * @return {Int} Return the step number of the position of current mapList
 	 */
@@ -120,6 +123,7 @@ var cago = (function($){
 	{
 		return this.mapList[this.prevIndex][i][j].color;
 	}
+
 	/*
 	 * Just put a empty map as the first map, count will plus 1
 	 */
@@ -164,7 +168,6 @@ var cago = (function($){
 	{
 		this.value = v;
 	}
-
 
 	/*
 	 * Copy a 2D array with FIXED_SIZE
@@ -242,13 +245,11 @@ var cago = (function($){
 		content.css({"width": WIDTH, "height": HEIGHT});
 
 		bgCanvas = $("<canvas></canvas>");
-		bgCanvas.attr("id", "bgCanvas");
 		bgCanvas.css({"position": "absolute", "border": "1px solid black", "z-index": "0"});
 		bgCanvas[0].width = WIDTH;
 		bgCanvas[0].height = HEIGHT;
 
 		stoneCanvas = $("<canvas></canvas>");
-		stoneCanvas.attr("id", "stoneCanvas");
 		stoneCanvas.css({"position": "absolute", "border": "1px solid black", "z-index": "1"});
 		stoneCanvas[0].width = WIDTH;
 		stoneCanvas[0].height = HEIGHT;
@@ -271,24 +272,26 @@ var cago = (function($){
 					<th>結果</th>\
 					<th>日期</th>\
 				</tr>\
-				<tr>\
-					<td id="PB"></td>\
-					<td id="BR"></td>\
-					<td id="PW"></td>\
-					<td id="WR"></td>\
-					<td id="KM"></td>\
-					<td id="RE"></td>\
-					<td id="DT"></td>\
-				</tr>\
 			</table>');
 		metaTable.addClass("table table-striped");
 		metaTable.css({"width": String(WIDTH) + "px", "display": "none"});
+		var row = $("<tr></tr>");
+		metaTr = new Array();
+		metaTr["PB"] = $("<td></td>");
+		metaTr["BR"] = $("<td></td>");
+		metaTr["PW"] = $("<td></td>");
+		metaTr["WR"] = $("<td></td>");
+		metaTr["KM"] = $("<td></td>");
+		metaTr["RE"] = $("<td></td>");
+		metaTr["DT"] = $("<td></td>");
 
 		group1.append(btn.begin).append(btn.fastBackward).append(btn.backward).append(btn.forward).append(btn.fastForward).append(btn.end);
 		group2.append(btn.flag);
 		group3.append(btn.auto);
 		toolBar.append(group1).append(group2).append(group3);
 		content.append(bgCanvas).append(stoneCanvas);
+		row.append(metaTr["PB"]).append(metaTr["BR"]).append(metaTr["PW"]).append(metaTr["WR"]).append(metaTr["KM"]).append(metaTr["RE"]).append(metaTr["DT"]);
+		metaTable.append(row);
 		container.append(toolBar).append(content).append(metaTable);
 	}
 
@@ -526,13 +529,13 @@ var cago = (function($){
 	}
 
 	/*
-	* Recursive delete stones
-	*
-	* @param {Array} m 2D array of MapMove object
-	* @param {Int} x The first index of m
-	* @param {Int} y The second index of m
-	* @param {Int} color The color of the stone you put, so the function has to traverse the other color
-	*/
+	 * Recursive delete stones
+	 *
+	 * @param {Array} m 2D array of MapMove object
+	 * @param {Int} x The first index of m
+	 * @param {Int} y The second index of m
+	 * @param {Int} color The color of the stone you put, so the function has to traverse the other color
+	 */
 	function deleteDeadStone(m, x, y, color)
 	{
 		m[x][y].color = -1;
@@ -551,6 +554,9 @@ var cago = (function($){
 		}
 	}
 
+	/*
+	 * Paint background color, lines, letters and numbers on the board
+	 */
 	function paintBoard()
 	{
 		// Draw color and lines of the board
@@ -597,8 +603,9 @@ var cago = (function($){
 		bgContext.closePath();
 
 	}
+
 	/*
-	 * Paint the whole board!
+	 * Paint stones, current position and steps on the board
 	 */
 	function paint()
 	{
@@ -828,16 +835,12 @@ var cago = (function($){
 	function main(data)
 	{
 		init();
-
 		readData(data);
-
-		// Add meta info in web page
 		for(var key in metaList)
 		{
-			document.getElementById(key).innerHTML = metaList[key];
+			metaTr[key].html(metaList[key]);
 		}
 		metaTable.show();
-
 		paintBoard();
 		paint();
 		addToolTip();
