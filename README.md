@@ -16,7 +16,8 @@ In index.html, find *cago.go* and modify its argument.
 
 ## Todo ##
 
-* Nothing now...
+* Remove id in metaTable
+* JQuery Plugin
 
 ## Library version ##
  

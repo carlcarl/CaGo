@@ -9,8 +9,9 @@ var cago = (function($){
 	var auto = false;
 
 	// DOM
-	var stoneCanvas, pointCanvas, numCanvas, bgCanvas;
-	var stoneContext, pointContext, numContext, bgContext; // The context of canvas
+	var container, content, metaTable;
+	var stoneCanvas, bgCanvas;
+	var stoneContext, bgContext; // The context of canvas
 	var tmpCanvas; // Canvas for pre-rendering
 	var ctx; // The context of tmpCanvas
 	var btn; // Store all the buttons in the html
@@ -44,6 +45,7 @@ var cago = (function($){
 		this.prevIndex = 0;
 		this.mapList = new Array();
 		this.moveList = new Array();
+		this.insertEmptyMap();
 	}
 	/*
 	 * Insert move with count++
@@ -190,9 +192,105 @@ var cago = (function($){
 	 */
 	function addToolTip()
 	{
-		$("#begin, #fastBackward, #backward, #forward, #fastForward, #end, #flag, #auto").tooltip({placement: "bottom"});
+		for(var key in btn)
+		{
+			btn[key].tooltip({placement: "bottom"});
+		}
 	}
 
+	/*
+	 * Initialization
+	 */
+	function init()
+	{
+		goMap = new GoMap();
+		exGoMap = new GoMap();
+		metaList = new Array();
+		map = new Array(FIXED_SIZE);
+		for(var i = 0; i < FIXED_SIZE; i++)
+		{
+			map[i] = new Array(FIXED_SIZE);
+			for(var j = 0; j < FIXED_SIZE; j++)
+			{
+				if(i === 0 || i === FS || j === 0 || j === FS) map[i][j] = new MapMove(-2, 0);
+				else map[i][j] = new MapMove(-1, 0);
+			}
+		}
+
+		container = $("#container");
+		container.css({"width": "500px", "margin": "5px"});
+
+		toolBar = $("<div></div>");
+		toolBar.addClass("btn-toolbar");
+
+		var group1 = $('<div class="btn-group"></div>');
+		btn = new Object();
+		btn.begin = $('<button class="btn" data-original-title="第一手"><i class="icon-step-backward"></i> </button>');
+		btn.fastBackward = $('<button class="btn" data-original-title="向前十手"><i class="icon-backward"></i> </button>');
+		btn.backward = $('<button class="btn" data-original-title="向前一手"><i class="icon-chevron-left"></i> </button>');
+		btn.forward = $('<button class="btn" data-original-title="向後一手"><i class="icon-chevron-right"></i> </button>');
+		btn.fastForward = $('<button class="btn" data-original-title="向後十手"><i class="icon-forward"></i> </button>');
+		btn.end = $('<button class="btn" data-original-title="最後一手"><i class="icon-step-forward"></i> </button>');
+
+		var group2 = $('<div class="btn-group"></div>');
+		btn.flag = $('<button class="btn" data-original-title="顯示手數"><i class="icon-flag"></i> </button>');
+
+		var group3 = $('<div class="btn-group"></div>');
+		btn.auto = $('<button class="btn" data-original-title="自動播放"><i class="icon-play-circle"></i> </button>');
+
+		content = $("<div></div>");
+		content.css({"width": WIDTH, "height": HEIGHT});
+
+		bgCanvas = $("<canvas></canvas>");
+		bgCanvas.attr("id", "bgCanvas");
+		bgCanvas.css({"position": "absolute", "border": "1px solid black", "z-index": "0"});
+		bgCanvas[0].width = WIDTH;
+		bgCanvas[0].height = HEIGHT;
+
+		stoneCanvas = $("<canvas></canvas>");
+		stoneCanvas.attr("id", "stoneCanvas");
+		stoneCanvas.css({"position": "absolute", "border": "1px solid black", "z-index": "1"});
+		stoneCanvas[0].width = WIDTH;
+		stoneCanvas[0].height = HEIGHT;
+
+		stoneContext = stoneCanvas[0].getContext("2d");
+		bgContext = bgCanvas[0].getContext("2d");
+
+		tmpCanvas = document.createElement("canvas");
+		tmpCanvas.width = WIDTH;
+		tmpCanvas.height = WIDTH;
+		ctx = tmpCanvas.getContext("2d");
+
+		metaTable = $('<table>\
+				<tr>\
+					<th>持黑</th>\
+					<th>棋力</th>\
+					<th>持白</th>\
+					<th>棋力</th>\
+					<th>讓子</th>\
+					<th>結果</th>\
+					<th>日期</th>\
+				</tr>\
+				<tr>\
+					<td id="PB"></td>\
+					<td id="BR"></td>\
+					<td id="PW"></td>\
+					<td id="WR"></td>\
+					<td id="KM"></td>\
+					<td id="RE"></td>\
+					<td id="DT"></td>\
+				</tr>\
+			</table>');
+		metaTable.addClass("table table-striped");
+		metaTable.css({"width": String(WIDTH) + "px", "display": "none"});
+
+		group1.append(btn.begin).append(btn.fastBackward).append(btn.backward).append(btn.forward).append(btn.fastForward).append(btn.end);
+		group2.append(btn.flag);
+		group3.append(btn.auto);
+		toolBar.append(group1).append(group2).append(group3);
+		content.append(bgCanvas).append(stoneCanvas);
+		container.append(toolBar).append(content).append(metaTable);
+	}
 
 	/*
 	* Parse the gibo data
@@ -729,66 +827,7 @@ var cago = (function($){
 	 */
 	function main(data)
 	{
-		goMap = new GoMap();
-		goMap.insertEmptyMap();
-		exGoMap = new GoMap();
-		exGoMap.insertEmptyMap();
-		metaList = new Array();
-		map = new Array(FIXED_SIZE);
-		for(var i = 0; i < FIXED_SIZE; i++)
-		{
-			map[i] = new Array(FIXED_SIZE);
-			for(var j = 0; j < FIXED_SIZE; j++)
-			{
-				if(i === 0 || i === FS || j === 0 || j === FS) map[i][j] = new MapMove(-2, 0);
-				else map[i][j] = new MapMove(-1, 0);
-			}
-		}
-
-		
-		// canvas = $("#myCanvas");
-		var content = $("#content");
-		content.css({"width": WIDTH, "height": HEIGHT});
-
-		bgCanvas = $("<canvas></canvas>");
-		bgCanvas.attr("id", "bgCanvas");
-		bgCanvas.css({"position": "absolute", "border": "1px solid black", "z-index": "0"});
-		bgCanvas[0].width = WIDTH;
-		bgCanvas[0].height = HEIGHT;
-		bgCanvas.appendTo(content);
-
-		stoneCanvas = $("<canvas></canvas>");
-		stoneCanvas.attr("id", "stoneCanvas");
-		stoneCanvas.css({"position": "absolute", "border": "1px solid black", "z-index": "1"});
-		stoneCanvas[0].width = WIDTH;
-		stoneCanvas[0].height = HEIGHT;
-		stoneCanvas.appendTo(content);
-
-		// pointCanvas = $("<canvas></canvas>");
-		// pointCanvas.attr("id", "pointCanvas");
-		// pointCanvas.css({"position": "absolute", "border": "1px solid black", "z-index": "1"});
-		// pointCanvas[0].width = WIDTH;
-		// pointCanvas[0].height = HEIGHT;
-		// pointCanvas.appendTo(content);
-
-		stoneContext = stoneCanvas[0].getContext("2d");
-		bgContext = bgCanvas[0].getContext("2d");
-		// pointContext = pointCanvas[0].getContext("2d");
-
-		tmpCanvas = document.createElement("canvas");
-		tmpCanvas.width = WIDTH;
-		tmpCanvas.height = WIDTH;
-		ctx = tmpCanvas.getContext("2d");
-
-		btn = new Object();
-		btn.begin = $("#begin");
-		btn.backward = $("#backward");
-		btn.fastBackward = $("#fastBackward");
-		btn.end= $("#end");
-		btn.forward= $("#forward");
-		btn.fastForward= $("#fastForward");
-		btn.flag = $("#flag");
-		btn.auto = $("#auto");
+		init();
 
 		readData(data);
 
@@ -797,7 +836,7 @@ var cago = (function($){
 		{
 			document.getElementById(key).innerHTML = metaList[key];
 		}
-		$("#meta").show();
+		metaTable.show();
 
 		paintBoard();
 		paint();
