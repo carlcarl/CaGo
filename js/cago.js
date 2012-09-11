@@ -220,13 +220,10 @@ var cago = (function($){
 			}
 		}
 
-		container = $("#container");
-		container.css({"width": "500px", "margin": "5px"});
+		container = $("#container").css({"width": "500px", "margin": "5px"});
 
-		toolBar = $("<div></div>");
-		toolBar.addClass("btn-toolbar");
+		toolBar = $("<div>").addClass("btn-toolbar");
 
-		var group1 = $('<div class="btn-group"></div>');
 		btn = new Object();
 		btn.begin = $('<button class="btn" data-original-title="第一手"><i class="icon-step-backward"></i> </button>');
 		btn.fastBackward = $('<button class="btn" data-original-title="向前十手"><i class="icon-backward"></i> </button>');
@@ -234,23 +231,20 @@ var cago = (function($){
 		btn.forward = $('<button class="btn" data-original-title="向後一手"><i class="icon-chevron-right"></i> </button>');
 		btn.fastForward = $('<button class="btn" data-original-title="向後十手"><i class="icon-forward"></i> </button>');
 		btn.end = $('<button class="btn" data-original-title="最後一手"><i class="icon-step-forward"></i> </button>');
-
-		var group2 = $('<div class="btn-group"></div>');
 		btn.flag = $('<button class="btn" data-original-title="顯示手數"><i class="icon-flag"></i> </button>');
-
-		var group3 = $('<div class="btn-group"></div>');
 		btn.auto = $('<button class="btn" data-original-title="自動播放"><i class="icon-play-circle"></i> </button>');
 
-		content = $("<div></div>");
-		content.css({"width": WIDTH, "height": HEIGHT});
+		var group1 = $('<div class="btn-group">');
+		var group2 = $('<div class="btn-group">');
+		var group3 = $('<div class="btn-group">');
 
-		bgCanvas = $("<canvas></canvas>");
-		bgCanvas.css({"position": "absolute", "border": "1px solid black", "z-index": "0"});
+		content = $("<div>").css({"width": WIDTH, "height": HEIGHT});
+
+		bgCanvas = $("<canvas>").css({"position": "absolute", "border": "1px solid black", "z-index": "0"});
 		bgCanvas[0].width = WIDTH;
 		bgCanvas[0].height = HEIGHT;
 
-		stoneCanvas = $("<canvas></canvas>");
-		stoneCanvas.css({"position": "absolute", "border": "1px solid black", "z-index": "1"});
+		stoneCanvas = $("<canvas>").css({"position": "absolute", "border": "1px solid black", "z-index": "1"});
 		stoneCanvas[0].width = WIDTH;
 		stoneCanvas[0].height = HEIGHT;
 
@@ -272,19 +266,18 @@ var cago = (function($){
 					<th>結果</th>\
 					<th>日期</th>\
 				</tr>\
-			</table>');
-		metaTable.addClass("table table-striped");
-		metaTable.css({"width": String(WIDTH) + "px", "display": "none"});
-		var row = $("<tr></tr>");
+			</table>').addClass("table table-striped").css({"width": String(WIDTH) + "px", "display": "none"});
+		var row = $("<tr>");
 		metaTr = new Array();
-		metaTr["PB"] = $("<td></td>");
-		metaTr["BR"] = $("<td></td>");
-		metaTr["PW"] = $("<td></td>");
-		metaTr["WR"] = $("<td></td>");
-		metaTr["KM"] = $("<td></td>");
-		metaTr["RE"] = $("<td></td>");
-		metaTr["DT"] = $("<td></td>");
+		metaTr["PB"] = $("<td>");
+		metaTr["BR"] = $("<td>");
+		metaTr["PW"] = $("<td>");
+		metaTr["WR"] = $("<td>");
+		metaTr["KM"] = $("<td>");
+		metaTr["RE"] = $("<td>");
+		metaTr["DT"] = $("<td>");
 
+		// Compose components
 		group1.append(btn.begin).append(btn.fastBackward).append(btn.backward).append(btn.forward).append(btn.fastForward).append(btn.end);
 		group2.append(btn.flag);
 		group3.append(btn.auto);
