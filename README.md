@@ -16,6 +16,7 @@ In index.html, find *cago.go* and modify its argument.
 
 ## Todo ##
 
+* Limit cago function scope
 * Decrease the memory usage when using multiple cago in a page.
 
 ## Library version ##
