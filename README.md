@@ -16,7 +16,7 @@ In index.html, find *cago.go* and modify its argument.
 
 ## Todo ##
 
-* JQuery Plugin
+* Decrease the memory usage when using multiple cago in a page.
 
 ## Library version ##
  

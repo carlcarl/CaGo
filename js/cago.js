@@ -1,4 +1,4 @@
-var cago = (function($){
+function Cago(){
 
 	// Your setting variable
 	var BASE = 400; // Base width of board
@@ -220,7 +220,7 @@ var cago = (function($){
 			}
 		}
 
-		container = $("#container").css({"width": "500px", "margin": "5px"});
+		container.css({"width": "500px", "margin": "5px"});
 
 		toolBar = $("<div>").addClass("btn-toolbar");
 
@@ -842,6 +842,11 @@ var cago = (function($){
 		stoneCanvas.click(putGo); // Use jQuery to work with IE
 	}
 
+	// $.fn.cago = function(filePath)
+	// {
+	// 	return this.each($.get(filePath).done(main));
+	// };
+
 	/*
 	 * Public API
 	 */
@@ -852,9 +857,10 @@ var cago = (function($){
 		 *
 		 * @param filePath {String} filePath The path of gibo file
 		 */
-		"go" : function(filePath)
+		"go" : function(c, filePath)
 		{
-			$.get(filePath).done(main);
+					container = $(c);
+					$.get(filePath).done(main);
 		},
 
 		/*
@@ -957,5 +963,10 @@ var cago = (function($){
 	};
 
 	return API;
-})(jQuery);
-
+}
+$.fn.cago = function(filePath){
+	this.each(function(){
+		var c = new Cago();
+		c.go(this,filePath);
+	});
+};
