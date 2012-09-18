@@ -11,12 +11,13 @@ A web page to parse and play go gibo(圍棋棋譜)
 
 In index.html, find *cago.go* and modify its argument.
 
-	window.onload = function(){cago.go("./example.sgf");};
-	// window.onload = function(){cago.go("./whatyouwant.sgf");};
+	$(document).ready(function(){
+		$(".container").cago("./example.sgf");
+		$(".container2").cago("./example.sgf");
+	});
 
 ## Todo ##
 
-* Limit cago function scope
 * Decrease the memory usage when using multiple cago in a page.
 
 ## Library version ##
