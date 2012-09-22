@@ -49,6 +49,7 @@
 			this.moveList = new Array();
 			this.insertEmptyMap();
 		}
+
 		/*
 		* Insert move with count++
 		*
@@ -69,6 +70,7 @@
 		{
 			this.moveList.push(move);
 		}
+
 		/*
 		* Remove n maps, this function only be used with exGoMap
 		*
@@ -87,6 +89,7 @@
 				this.count--;
 			}
 		}
+
 		/*
 		* @return {Array} Return current map(2D array) of MapMove object
 		*/
