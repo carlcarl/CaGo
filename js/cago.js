@@ -411,9 +411,11 @@
 			}
 
 			exGoMap.insertMove(new Move(moveX, moveY));
-			findDeadStone(exGoMap.mapList[exGoMap.index], moveX, moveY);
+			findDeadStone(exGoMap.mapList[exGoMap.index + 1], moveX, moveY);
+			exGoMap.prevIndex = exGoMap.index;
+
 			exGoMap.index++;
-			exGoMap.count++;
+			exGoMap.count++; // Just for logic
 			changeButtonState();
 			paint();
 		}
@@ -615,7 +617,15 @@
 				{
 					for(var j = 1; j < FS; j++)
 					{
-						c = exGoMap.mapList[index][i][j].color;
+						// c = exGoMap.mapList[index][i][j].color;
+						c = exGoMap.getCurrentMapCellColor(i, j);
+						c2 = exGoMap.getPrevMapCellColor(i, j);
+
+						if((c2 === 0 || c2 === 1) && (c === -1)) // Previous exist but now gone, so clear this part
+						{
+							ctx.drawImage(bgCanvas[0], SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE, SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE);
+							continue;
+						}
 						if(c === 0)
 						{
 							ctx.fillStyle = "white";
@@ -645,9 +655,12 @@
 					for(var j = 1; j < FS; j++)
 					{
 						c = goMap.getCurrentMapCellColor(i, j);
-						c2 = goMap.getPrevMapCellColor(i, j);
+						c2 = (exGoMap.prevIndex > 0) ? exGoMap.getPrevMapCellColor(i, j) : goMap.getPrevMapCellColor(i, j);
+						// c2 = goMap.getPrevMapCellColor(i, j);
 
-						/* if(c2 === c) continue; */
+						// Comment this because the red point would continue to show on previous stones.
+						// if(c2 === c) continue;
+
 						if((c2 === 0 || c2 === 1) && (c === -1)) // Previous exist but now gone, so clear this part
 						{
 							ctx.drawImage(bgCanvas[0], SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE, SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE);
@@ -867,13 +880,17 @@
 			 */
 			"begin" : function()
 			{
-				goMap.prevIndex = goMap.index;
+				goMap.prevIndex = 0;
 				goMap.index = 0;
 				if(exGoMap.index > 0)
 				{
 					exGoMap.remove(exGoMap.index);
+					exGoMap.prevIndex = 0;
 					exGoMap.index = 0;
 				}
+
+				// I think clearing the board here is better than sub rendering
+				ctx.drawImage(bgCanvas[0], 0, 0, WIDTH, HEIGHT);
 				changeButtonState();
 				paint();
 			},
@@ -895,15 +912,14 @@
 				}
 				else
 				{
-					exGoMap.remove(num);
+					exGoMap.prevIndex = exGoMap.index;
 					if(exGoMap.index - num <= 0) exGoMap.index = 0;
 					else exGoMap.index -= num;
-					// Because exGoMap doesn't keep previous state, 
-					// the only method to delete the previous stones is to clear the whole canvas
-					ctx.drawImage(bgCanvas[0], 0, 0, WIDTH, HEIGHT);
 				}
 				changeButtonState();
 				paint();
+				if(exGoMap.prevIndex > 0) exGoMap.remove(num);
+				if(exGoMap.index <= 0) exGoMap.prevIndex = 0;
 			},
 
 			/*
