@@ -51,11 +51,11 @@
 		}
 
 		/*
-		* Insert move with count++
-		*
-		* @param {Array} m 2D array of MapMove object which include processed information of 'move'
-		* @param {Move} move Move object
-		*/
+		 * Insert move with count++
+		 *
+		 * @param {Array} m 2D array of MapMove object which include processed information of 'move'
+		 * @param {Move} move Move object
+		 */
 		GoMap.prototype.insert = function(m, move)
 		{
 			this.insertMap(m);
@@ -72,10 +72,10 @@
 		}
 
 		/*
-		* Remove n maps, this function only be used with exGoMap
-		*
-		* @param {Int} n number of maps to be removed
-		*/
+		 * Remove n maps, this function only be used with exGoMap
+		 *
+		 * @param {Int} n number of maps to be removed
+		 */
 		GoMap.prototype.remove = function(n)
 		{
 			for(var i = 0; i < n; i++)
@@ -91,8 +91,8 @@
 		}
 
 		/*
-		* @return {Array} Return current map(2D array) of MapMove object
-		*/
+		 * @return {Array} Return current map(2D array) of MapMove object
+		 */
 		GoMap.prototype.getCurrentMap = function()
 		{
 			return this.mapList[this.index];
@@ -103,34 +103,34 @@
 		}
 
 		/*
-		* @return {Move} Return current move
-		*/
+		 * @return {Move} Return current move
+		 */
 		GoMap.prototype.getCurrentMove = function()
 		{
 			return this.moveList[this.index];
 		}
 
 		/*
-		* @return {Int} Return the step number of the position of current mapList
-		*/
+		 * @return {Int} Return the step number of the position of current mapList
+		 */
 		GoMap.prototype.getCurrentMapCellNum = function(i, j)
 		{
 			return this.mapList[this.index][i][j].num;
 		}
 
 		/*
-		* Track previous state to render changed part
-		*
-		* @return {Int} Return the step number of the position of previous mapList
-		*/
+		 * Track previous state to render changed part
+		 *
+		 * @return {Int} Return the step number of the position of previous mapList
+		 */
 		GoMap.prototype.getPrevMapCellColor = function(i, j)
 		{
 			return this.mapList[this.prevIndex][i][j].color;
 		}
 
 		/*
-		* Just put a empty map as the first map, count will plus 1
-		*/
+		 * Just put a empty map as the first map, count will plus 1
+		 */
 		GoMap.prototype.insertEmptyMap = function()
 		{
 			var map = new Array(FIXED_SIZE);
@@ -147,8 +147,8 @@
 		}
 
 		/*
-		* A unit in GoMap.mapList
-		*/
+		 * A unit in GoMap.mapList
+		 */
 		function MapMove(t, n)
 		{
 			this.color = t;
@@ -156,8 +156,8 @@
 		}
 
 		/*
-		* A unit in GoMap.moveList
-		*/
+		 * A unit in GoMap.moveList
+		 */
 		function Move(x, y)
 		{
 			this.x = x;
@@ -166,19 +166,19 @@
 
 
 		/* 
-		* My Bool object to check dead stone
-		*/
+		 * My Bool object to check dead stone
+		 */
 		function Dead(v)
 		{
 			this.value = v;
 		}
 
 		/*
-		* Copy a 2D array with FIXED_SIZE
-		*
-		* @param {Array} m A 2D array of MapMove object
-		* @return {Array} Returns a clone of the 2D array of MapMove object
-		*/
+		 * Copy a 2D array with FIXED_SIZE
+		 *
+		 * @param {Array} m A 2D array of MapMove object
+		 * @return {Array} Returns a clone of the 2D array of MapMove object
+		 */
 		function copyMap(m)
 		{
 			var tmpMap = new Array(FIXED_SIZE);
@@ -195,8 +195,8 @@
 		}
 
 		/*
-		* Add tooltip to these buttons
-		*/
+		 * Add tooltip to these buttons
+		 */
 		function addToolTip()
 		{
 			for(var key in btn)
@@ -206,8 +206,8 @@
 		}
 
 		/*
-		* Initialization
-		*/
+		 * Initialization
+		 */
 		function init()
 		{
 			goMap = new GoMap();
@@ -261,60 +261,60 @@
 			ctx = tmpCanvas.getContext("2d");
 
 			metaTable = $('<table>\
-				<tr>\
-				<th>持黑</th>\
-				<th>棋力</th>\
-				<th>持白</th>\
-				<th>棋力</th>\
-				<th>讓子</th>\
-				<th>結果</th>\
-				<th>日期</th>\
-				</tr>\
-			</table>').addClass("table table-striped").css({"width": String(WIDTH) + "px", "display": "none"});
-		var row = $("<tr>");
-		metaTr = new Array();
-		metaTr["PB"] = $("<td>");
-		metaTr["BR"] = $("<td>");
-		metaTr["PW"] = $("<td>");
-		metaTr["WR"] = $("<td>");
-		metaTr["KM"] = $("<td>");
-		metaTr["RE"] = $("<td>");
-		metaTr["DT"] = $("<td>");
+					<tr>\
+					<th>持黑</th>\
+					<th>棋力</th>\
+					<th>持白</th>\
+					<th>棋力</th>\
+					<th>讓子</th>\
+					<th>結果</th>\
+					<th>日期</th>\
+					</tr>\
+					</table>').addClass("table table-striped").css({"width": String(WIDTH) + "px", "display": "none"});
+			var row = $("<tr>");
+			metaTr = new Array();
+			metaTr["PB"] = $("<td>");
+			metaTr["BR"] = $("<td>");
+			metaTr["PW"] = $("<td>");
+			metaTr["WR"] = $("<td>");
+			metaTr["KM"] = $("<td>");
+			metaTr["RE"] = $("<td>");
+			metaTr["DT"] = $("<td>");
 
-		// Compose components
-		group1.append(btn.begin).append(btn.fastBackward).append(btn.backward).append(btn.forward).append(btn.fastForward).append(btn.end);
-		group2.append(btn.flag);
-		group3.append(btn.auto);
-		toolBar.append(group1).append(group2).append(group3);
-		content.append(bgCanvas).append(stoneCanvas);
-		row.append(metaTr["PB"]).append(metaTr["BR"]).append(metaTr["PW"]).append(metaTr["WR"]).append(metaTr["KM"]).append(metaTr["RE"]).append(metaTr["DT"]);
-		metaTable.append(row);
-		container.append(toolBar).append(content).append(metaTable);
+			// Compose components
+			group1.append(btn.begin).append(btn.fastBackward).append(btn.backward).append(btn.forward).append(btn.fastForward).append(btn.end);
+			group2.append(btn.flag);
+			group3.append(btn.auto);
+			toolBar.append(group1).append(group2).append(group3);
+			content.append(bgCanvas).append(stoneCanvas);
+			row.append(metaTr["PB"]).append(metaTr["BR"]).append(metaTr["PW"]).append(metaTr["WR"]).append(metaTr["KM"]).append(metaTr["RE"]).append(metaTr["DT"]);
+			metaTable.append(row);
+			container.append(toolBar).append(content).append(metaTable);
 		}
 
 		/*
-		* Parse the gibo data
-		*
-		* @param {String} data The data string in the gibo file
-		*/
+		 * Parse the gibo data
+		 *
+		 * @param {String} data The data string in the gibo file
+		 */
 		function readData(data)
 		{
 			var metaEnd = data.indexOf(";B");
 
 			var i = 0
-			var t, result, d;
+				var t, result, d;
 			for(var me = metaEnd - 1; i < me; i++)
 			{
 				t = data.substring(i, i + 2).toUpperCase();
 				if($.inArray(t, TOKEN_LIST) != -1 || $.inArray(t, OPTIONAL_TOKEN_LIST) != -1)
 				{
 					if(data[i + 2] === "[") // Have to check this is a token with '[', or it may be a normal string
-						{
-							result = getTokenData(data, i + 3);
-							d = result[0];
-							i = result[1];
-							metaList[t] = d;
-						}
+					{
+						result = getTokenData(data, i + 3);
+						d = result[0];
+						i = result[1];
+						metaList[t] = d;
+					}
 				}
 			}
 
@@ -346,11 +346,11 @@
 		}
 
 		/*
-		* When you click on the board, the function will process it 
-		* and paint the stone on the board.
-		*
-		* @param {MouseEvent} e mouse event
-		*/
+		 * When you click on the board, the function will process it 
+		 * and paint the stone on the board.
+		 *
+		 * @param {MouseEvent} e mouse event
+		 */
 		function putGo(e)
 		{
 			var x = e.pageX - stoneCanvas.offset().left;
@@ -419,12 +419,12 @@
 		}
 
 		/*
-		* Get the data with the token
-		*
-		* @param {String} data the data string in the gibo file
-		* @param {Int} index The current index in the data string
-		* @return {Array} Returns an array with [0]:token data, [1]: the index after the token data
-		*/
+		 * Get the data with the token
+		 *
+		 * @param {String} data the data string in the gibo file
+		 * @param {Int} index The current index in the data string
+		 * @return {Array} Returns an array with [0]:token data, [1]: the index after the token data
+		 */
 		function getTokenData(data, index)
 		{
 			var i = index;
@@ -442,13 +442,13 @@
 		}
 
 		/*
-		* Find dead stone groups from 4 sides
-		* If found, delete them
-		*
-		* @param {Array} m 2D array of MapMove object
-		* @param {Int} x The first index of m
-		* @param {Int} y The second index of m
-		*/
+		 * Find dead stone groups from 4 sides
+		 * If found, delete them
+		 *
+		 * @param {Array} m 2D array of MapMove object
+		 * @param {Int} x The first index of m
+		 * @param {Int} y The second index of m
+		 */
 		function findDeadStone(map, x, y)
 		{
 			var m = copyMap(map);
@@ -496,14 +496,14 @@
 		}
 
 		/*
-		* Recursive traverse to find dead stones
-		*
-		* @param {Array} m 2D array of MapMove object
-		* @param {Int} x The first index of m
-		* @param {Int} y The second index of m
-		* @param {Int} color The color of the stone you put, so the function has to traverse the other color
-		* @param {Dead} dead A boolean object to check if the stones are dead
-		*/
+		 * Recursive traverse to find dead stones
+		 *
+		 * @param {Array} m 2D array of MapMove object
+		 * @param {Int} x The first index of m
+		 * @param {Int} y The second index of m
+		 * @param {Int} color The color of the stone you put, so the function has to traverse the other color
+		 * @param {Dead} dead A boolean object to check if the stones are dead
+		 */
 		function traverse(m, x, y, color, dead)
 		{
 			m[x][y].color = -2; // Tag to avoid traversing the same position twice.
@@ -526,13 +526,13 @@
 		}
 
 		/*
-		* Recursive delete stones
-		*
-		* @param {Array} m 2D array of MapMove object
-		* @param {Int} x The first index of m
-		* @param {Int} y The second index of m
-		* @param {Int} color The color of the stone you put, so the function has to traverse the other color
-		*/
+		 * Recursive delete stones
+		 *
+		 * @param {Array} m 2D array of MapMove object
+		 * @param {Int} x The first index of m
+		 * @param {Int} y The second index of m
+		 * @param {Int} color The color of the stone you put, so the function has to traverse the other color
+		 */
 		function deleteDeadStone(m, x, y, color)
 		{
 			m[x][y].color = -1;
@@ -552,8 +552,8 @@
 		}
 
 		/*
-		* Paint background color, lines, letters and numbers on the board
-		*/
+		 * Paint background color, lines, letters and numbers on the board
+		 */
 		function paintBoard()
 		{
 			// Draw color and lines of the board
@@ -577,7 +577,7 @@
 			bgContext.font = "bold 12px sans-serif";
 			bgContext.textBaseline = "bottom";
 			var ss = SPACE + (SPACE * 0.25), hs = HEIGHT - (SPACE * 0.5), ws = WIDTH - SPACE, s3 = SPACE >> 3, 
-			baseCode = "A".charCodeAt(0), code, t1;
+				baseCode = "A".charCodeAt(0), code, t1;
 			for(var i = 1; i < FS; i++)
 			{
 				code = baseCode + i - 1;
@@ -602,8 +602,8 @@
 		}
 
 		/*
-		* Paint stones, current position and steps on the board
-		*/
+		 * Paint stones, current position and steps on the board
+		 */
 		function paint()
 		{
 			if(exGoMap.index > 0)
@@ -718,20 +718,20 @@
 								fix = S;
 							}
 							else if(num <= 0) continue;
-						else if(num < 10)
-						{
-							fix = s85;
-						}
-						else if(num < 100)
-						{
-							fix = s625;
-						}
-						else
-						{
-							fix = s75;
-						}
-						ctx.fillText(num, SPACE * i + fix, SPACE * (j + 1.25));
-						ctx.closePath();
+							else if(num < 10)
+							{
+								fix = s85;
+							}
+							else if(num < 100)
+							{
+								fix = s625;
+							}
+							else
+							{
+								fix = s75;
+							}
+							ctx.fillText(num, SPACE * i + fix, SPACE * (j + 1.25));
+							ctx.closePath();
 						}
 					}
 				}
@@ -740,10 +740,10 @@
 		}
 
 		/*
-		* Enable or disable the buttons according to 
-		* 1. auto setting
-		* 2. If at the begin or end
-		*/
+		 * Enable or disable the buttons according to 
+		 * 1. auto setting
+		 * 2. If at the begin or end
+		 */
 		function changeButtonState()
 		{
 			if(auto === true) 
@@ -800,8 +800,8 @@
 		}
 
 		/*
-		* Add click event on buttons
-		*/
+		 * Add click event on buttons
+		 */
 		function addButtonEvent()
 		{
 			btn.begin.click(API.begin);
@@ -815,8 +815,8 @@
 		}
 
 		/*
-		* Called by API.setAuto
-		*/
+		 * Called by API.setAuto
+		 */
 		function autoPlay()
 		{
 			if(auto && goMap.index < goMap.count - 1)
@@ -827,8 +827,8 @@
 		}
 
 		/*
-		* Main process
-		*/
+		 * Main process
+		 */
 		function main(data)
 		{
 			init();
@@ -847,15 +847,15 @@
 		}
 
 		/*
-		* Public API
-		*/
+		 * Public API
+		 */
 		var API = {
 
 			/*
-			* Ajax get gibo file then execute main function
-			*
-			* @param filePath {String} filePath The path of gibo file
-			*/
+			 * Ajax get gibo file then execute main function
+			 *
+			 * @param filePath {String} filePath The path of gibo file
+			 */
 			"go" : function(c, filePath)
 			{
 				container = $(c);
@@ -863,8 +863,8 @@
 			},
 
 			/*
-			* Move to the beginning of the game
-			*/
+			 * Move to the beginning of the game
+			 */
 			"begin" : function()
 			{
 				goMap.prevIndex = goMap.index;
@@ -879,10 +879,10 @@
 			},
 
 			/*
-			* Backward num steps
-			*
-			* @param {Int} num The number of steps
-			*/
+			 * Backward num steps
+			 *
+			 * @param {Int} num The number of steps
+			 */
 			"backward" : function(num)
 			{
 				if(exGoMap.index <= 0)
@@ -907,10 +907,10 @@
 			},
 
 			/*
-			* Forward num steps
-			*
-			* @param {Int} num The number of steps
-			*/
+			 * Forward num steps
+			 *
+			 * @param {Int} num The number of steps
+			 */
 			"forward" : function(num)
 			{
 				goMap.prevIndex = goMap.index;
@@ -923,8 +923,8 @@
 			},
 
 			/*
-			* Move to the end of the game
-			*/
+			 * Move to the end of the game
+			 */
 			"end" : function()
 			{
 				goMap.prevIndex = goMap.index;
@@ -934,8 +934,8 @@
 			},
 
 			/*
-			* Display step number or not
-			*/
+			 * Display step number or not
+			 */
 			"flag" : function()
 			{
 				displayNum = !displayNum;
@@ -943,8 +943,8 @@
 			},
 
 			/*
-			* Set auto play or not
-			*/
+			 * Set auto play or not
+			 */
 			"setAuto" : function()
 			{
 				auto = !auto;
