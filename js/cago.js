@@ -111,6 +111,14 @@
 		}
 
 		/*
+		 * @return {Move} Return Previous move
+		 */
+		GoMap.prototype.getPrevMove = function()
+		{
+			return this.moveList[this.prevIndex];
+		}
+
+		/*
 		 * @return {Int} Return the step number of the position of current mapList
 		 */
 		GoMap.prototype.getCurrentMapCellNum = function(i, j)
@@ -656,7 +664,6 @@
 					{
 						c = goMap.getCurrentMapCellColor(i, j);
 						c2 = (exGoMap.prevIndex > 0) ? exGoMap.getPrevMapCellColor(i, j) : goMap.getPrevMapCellColor(i, j);
-						// c2 = goMap.getPrevMapCellColor(i, j);
 
 						// Comment this because the red point would continue to show on previous stones.
 						// if(c2 === c) continue;
@@ -669,11 +676,14 @@
 
 						if(c === 0)
 						{
-							ctx.fillStyle = "white";
+							ctx.fillStyle = "#E0E0E0";
 						}
 						else if(c === 1)
 						{
-							ctx.fillStyle = "black";
+							gradient = ctx.createRadialGradient(SPACE * ( i + 1 ), SPACE * (j + 1), S, SPACE * ( i + 1 ) - 3.2, SPACE * (j + 1) - 3, 0.5);
+							gradient.addColorStop(0, "#000000");
+							gradient.addColorStop(1, "#4f4f4f");
+							ctx.fillStyle = gradient;
 						}
 
 						if(c === 0 || c === 1)
