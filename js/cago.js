@@ -22,7 +22,7 @@
 			metaTr, // tr row in metaTable which show meta data
 			// Program const variable
 			BOARD_LENGTH = BOARD_BASE_LENGTH + (BOARD_BASE_LENGTH / 10),
-			SPACE = BOARD_BASE_LENGTH / 20,
+			SPACE = BOARD_BASE_LENGTH / (LINE_NUM + 1),
 			FIXED_SIZE = LINE_NUM + 2,
 			TOKEN_LIST = ["PW", "PB", "RE", "DT", "KM"], // The token needed to be found in the gibo file
 			OPTIONAL_TOKEN_LIST = ["WR", "BR"],
