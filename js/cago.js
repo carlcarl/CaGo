@@ -576,78 +576,58 @@
 		}
 
 		/*
+		 * Paint stone
+		 */
+		function paintStone(x, y, prevMove) {
+			var tmpGoMap, c, c2,
+				gradient;
+
+			if (exGoMap.currentMoveIndex > 0) {
+				tmpGoMap = exGoMap;
+			} else {
+				tmpGoMap = goMap;
+			}
+
+			c = tmpGoMap.getCurrentMapCellColor(x, y);
+			c2 = (exGoMap.prevMoveIndex > 0) ? exGoMap.getPrevMapCellColor(x, y) : goMap.getPrevMapCellColor(x, y);
+
+			if ((c2 === 0 || c2 === 1) && (c === -1)) { // Previous exist but now gone, so clear this part
+				ctx.clearRect(SPACE * (x + 0.5), SPACE * (y + 0.5), SPACE, SPACE, SPACE * (x + 0.5), SPACE * (y + 0.5), SPACE, SPACE);
+				stoneContext.clearRect(SPACE * (x + 0.5), SPACE * (y + 0.5), SPACE, SPACE, SPACE * (x + 0.5), SPACE * (y + 0.5), SPACE, SPACE);
+			} else if (((c2 === -1) && (c === 0 || c === 1)) || (prevMove.x === x && prevMove.y === y)) {
+				if (c === 0) {
+					ctx.fillStyle = "#E0E0E0";
+				} else if (c === 1) {
+					gradient = ctx.createRadialGradient(SPACE * (x + 1), SPACE * (y + 1), S, SPACE * (x + 1) - 3.2, SPACE * (y + 1) - 3, 0.5);
+					gradient.addColorStop(0, "#000000");
+					gradient.addColorStop(1, "#4f4f4f");
+					ctx.fillStyle = gradient;
+				}
+
+				if (c === 0 || c === 1) {
+					ctx.beginPath();
+					ctx.arc(SPACE * (x + 1), SPACE * (y + 1), S, 0, MP, true);
+					ctx.fill();
+					ctx.closePath();
+				}
+			}
+		}
+
+		/*
 		 * Paint stones, current position and steps on the board
 		 */
 		function paint() {
 			var c, c2,
 				i, j,
-				gradient,
 				m,
 				s85, s75, s625,
-				fix, num;
-			if (exGoMap.currentMoveIndex > 0) {
-				// Draw stone
+				fix, num,
+				prevMove;
 
-				for (i = 1; i < FS; i += 1) {
-					for (j = 1; j < FS; j += 1) {
-						c = exGoMap.getCurrentMapCellColor(i, j);
-						c2 = exGoMap.getPrevMapCellColor(i, j);
-
-						if ((c2 === 0 || c2 === 1) && (c === -1)) { // Previous exist but now gone, so clear this part
-							ctx.clearRect(SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE, SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE);
-							stoneContext.clearRect(SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE, SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE);
-							continue;
-						}
-						if (c === 0) {
-							ctx.fillStyle = "#E0E0E0";
-						} else if (c === 1) {
-							gradient = ctx.createRadialGradient(SPACE * (i + 1), SPACE * (j + 1), S, SPACE * (i + 1) - 3.2, SPACE * (j + 1) - 3, 0.5);
-							gradient.addColorStop(0, "#000000");
-							gradient.addColorStop(1, "#4f4f4f");
-							ctx.fillStyle = gradient;
-						}
-
-						if (c === 0 || c === 1) {
-							ctx.beginPath();
-							ctx.arc(SPACE * (i + 1), SPACE * (j + 1), S, 0, MP, true);
-							ctx.fill();
-							ctx.closePath();
-						}
-					}
-				}
-			} else {
-				// I try to seperate into two for loops to reduce fillStyle change
-				// But the performance is the same, I think getCurrentMapCellColor and redundent for loop still reduce performance
-				for (i = 1; i < FS; i += 1) {
-					for (j = 1; j < FS; j += 1) {
-						c = goMap.getCurrentMapCellColor(i, j);
-						c2 = (exGoMap.prevMoveIndex > 0) ? exGoMap.getPrevMapCellColor(i, j) : goMap.getPrevMapCellColor(i, j);
-
-						// Comment this because the red point would continue to show on previous stones.
-						// if(c2 === c) continue;
-
-						if ((c2 === 0 || c2 === 1) && (c === -1)) {// Previous exist but now gone, so clear this part
-							ctx.clearRect(SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE, SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE);
-							stoneContext.clearRect(SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE, SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE);
-							continue;
-						}
-
-						if (c === 0) {
-							ctx.fillStyle = "#E0E0E0";
-						} else if (c === 1) {
-							gradient = ctx.createRadialGradient(SPACE * (i + 1), SPACE * (j + 1), S, SPACE * (i + 1) - 3.2, SPACE * (j + 1) - 3, 0.5);
-							gradient.addColorStop(0, "#000000");
-							gradient.addColorStop(1, "#4f4f4f");
-							ctx.fillStyle = gradient;
-						}
-
-						if (c === 0 || c === 1) {
-							ctx.beginPath();
-							ctx.arc(SPACE * (i + 1), SPACE * (j + 1), S, 0, MP, true);
-							ctx.fill();
-							ctx.closePath();
-						}
-					}
+			prevMove = (exGoMap.prevMoveIndex > 0) ? exGoMap.getPrevMove() : goMap.getPrevMove();
+			for (i = 1; i < FS; i += 1) {
+				for (j = 1; j < FS; j += 1) {
+					paintStone(i, j, prevMove);
 				}
 			}
 
