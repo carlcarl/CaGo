@@ -7,7 +7,7 @@
 	function Cago() {
 
 		// Your setting variable
-		var BASE = 400, SIZE = 19,
+		var BOARD_BASE_LENGTH = 400, LINE_NUM = 19,
 			FAST_STEP_NUM = 10, // One click with 10 steps
 			TIME_INTERVAL = 2000, // 2000ms
 			displayNum = false,
@@ -21,15 +21,14 @@
 			btn, // Store all the buttons in the html
 			metaTr, // tr row in metaTable which show meta data
 			// Program const variable
-			WIDTH = BASE + (BASE / 10),
-			HEIGHT = WIDTH,
-			SPACE = BASE / 20,
-			FIXED_SIZE = SIZE + 2,
+			BOARD_LENGTH = BOARD_BASE_LENGTH + (BOARD_BASE_LENGTH / 10),
+			SPACE = BOARD_BASE_LENGTH / 20,
+			FIXED_SIZE = LINE_NUM + 2,
 			TOKEN_LIST = ["PW", "PB", "RE", "DT", "KM"], // The token needed to be found in the gibo file
 			OPTIONAL_TOKEN_LIST = ["WR", "BR"],
 			STEP_VECTOR = [[0, 1], [1, 0], [-1, 0], [0, -1]], // Used for easy traverse and find dead stones
 			// Improve performance
-			FS = FIXED_SIZE - 1,
+			FS = LINE_NUM + 1,
 			S = SPACE / 2,
 			S2 = SPACE / 4,
 			TS = SPACE * 2,
@@ -42,9 +41,9 @@
 			API;
 
 		function GoMap() {
-			this.count = 0;
-			this.index = 0;
-			this.prevIndex = 0;
+			this.totalMoveCount = 0;
+			this.currentMoveIndex = 0;
+			this.prevMoveIndex = 0;
 			this.mapList = [];
 			this.moveList = [];
 			this.insertEmptyMap();
@@ -89,7 +88,7 @@
 		}
 
 		/*
-		 * Insert move with count++
+		 * Insert move with totalMoveCount++
 		 *
 		 * @param {Array} m 2D array of MapMove object which include processed information of 'move'
 		 * @param {Move} move Move object
@@ -97,7 +96,7 @@
 		GoMap.prototype.insert = function (m, move) {
 			this.insertMap(m);
 			this.insertMove(move);
-			this.count += 1;
+			this.totalMoveCount += 1;
 		};
 
 		GoMap.prototype.insertMap = function (m) {
@@ -117,12 +116,12 @@
 			var i;
 			for (i = 0; i < n; i += 1) {
 				// GoMap will insert a empty map at first, so keep at least one
-				if (this.count <= 1) {
+				if (this.totalMoveCount <= 1) {
 					break;
 				}
 				this.mapList.pop();
 				this.moveList.pop();
-				this.count -= 1;
+				this.totalMoveCount -= 1;
 			}
 		};
 
@@ -130,32 +129,32 @@
 		 * @return {Array} Return current map(2D array) of MapMove object
 		 */
 		GoMap.prototype.getCurrentMap = function () {
-			return this.mapList[this.index];
+			return this.mapList[this.currentMoveIndex];
 		};
 
 		GoMap.prototype.getCurrentMapCellColor = function (i, j) {
-			return this.mapList[this.index][i][j].color;
+			return this.mapList[this.currentMoveIndex][i][j].color;
 		};
 
 		/*
 		 * @return {Move} Return current move
 		 */
 		GoMap.prototype.getCurrentMove = function () {
-			return this.moveList[this.index];
+			return this.moveList[this.currentMoveIndex];
 		};
 
 		/*
 		 * @return {Move} Return Previous move
 		 */
 		GoMap.prototype.getPrevMove = function () {
-			return this.moveList[this.prevIndex];
+			return this.moveList[this.prevMoveIndex];
 		};
 
 		/*
 		 * @return {Int} Return the step number of the position of current mapList
 		 */
 		GoMap.prototype.getCurrentMapCellNum = function (i, j) {
-			return this.mapList[this.index][i][j].num;
+			return this.mapList[this.currentMoveIndex][i][j].num;
 		};
 
 		/*
@@ -164,11 +163,11 @@
 		 * @return {Int} Return the step number of the position of previous mapList
 		 */
 		GoMap.prototype.getPrevMapCellColor = function (i, j) {
-			return this.mapList[this.prevIndex][i][j].color;
+			return this.mapList[this.prevMoveIndex][i][j].color;
 		};
 
 		/*
-		 * Just put a empty map as the first map, count will plus 1
+		 * Just put a empty map as the first map, totalMoveCount will plus 1
 		 */
 		GoMap.prototype.insertEmptyMap = function () {
 			var map = [], i, j;
@@ -248,22 +247,22 @@
 			group2 = $('<div class="btn-group">');
 			group3 = $('<div class="btn-group">');
 
-			content = $("<div>").css({"width": WIDTH, "height": HEIGHT});
+			content = $("<div>").css({"width": BOARD_LENGTH, "height": BOARD_LENGTH});
 
 			bgCanvas = $("<canvas>").css({"position": "absolute", "border": "1px solid black", "z-index": "0"});
-			bgCanvas[0].width = WIDTH;
-			bgCanvas[0].height = HEIGHT;
+			bgCanvas[0].width = BOARD_LENGTH;
+			bgCanvas[0].height = BOARD_LENGTH;
 
 			stoneCanvas = $("<canvas>").css({"position": "absolute", "border": "1px solid black", "z-index": "1"});
-			stoneCanvas[0].width = WIDTH;
-			stoneCanvas[0].height = HEIGHT;
+			stoneCanvas[0].width = BOARD_LENGTH;
+			stoneCanvas[0].height = BOARD_LENGTH;
 
 			stoneContext = stoneCanvas[0].getContext("2d");
 			bgContext = bgCanvas[0].getContext("2d");
 
 			tmpCanvas = document.createElement("canvas");
-			tmpCanvas.width = WIDTH;
-			tmpCanvas.height = WIDTH;
+			tmpCanvas.width = BOARD_LENGTH;
+			tmpCanvas.height = BOARD_LENGTH;
 			ctx = tmpCanvas.getContext("2d");
 
 			metaTable = $(
@@ -278,7 +277,7 @@
 					<th>日期</th>\
 					</tr>\
 					</table>'
-			).addClass("table table-striped").css({"width": String(WIDTH) + "px", "display": "none"});
+			).addClass("table table-striped").css({"width": String(BOARD_LENGTH) + "px", "display": "none"});
 			row = $("<tr>");
 			metaTr = [];
 			metaTr.PB = $("<td>");
@@ -429,10 +428,10 @@
 		function readData(data) {
 			var metaEnd = data.indexOf(";B"), i = 0,
 				t, result, d,
-				me,
+				m,
 				x, y, move, color;
 
-			for (me = metaEnd - 1; i < me; i += 1) {
+			for (m = metaEnd - 1; i < m; i += 1) {
 				t = data.substring(i, i + 2).toUpperCase();
 				if ($.inArray(t, TOKEN_LIST) !== -1 || $.inArray(t, OPTIONAL_TOKEN_LIST) !== -1) {
 					// Have to check this is a token with '[', or it may be a normal string
@@ -466,7 +465,7 @@
 					y = d.charCodeAt(1) - "a".charCodeAt(0) + 1;
 					move = new Move(x, y);
 					map[x][y].color = color;
-					map[x][y].num = goMap.count;
+					map[x][y].num = goMap.totalMoveCount;
 					findDeadStone(map, x, y);
 
 					goMap.insert(map, move);
@@ -490,7 +489,7 @@
 				return;
 			}
 
-			if ((goMap.index === 0) && (exGoMap.index === 0)) { // Beginning
+			if ((goMap.currentMoveIndex === 0) && (exGoMap.currentMoveIndex === 0)) { // Beginning
 				btn.begin.prop("disabled", true);
 				btn.begin.tooltip("hide");
 				btn.backward.prop("disabled", true);
@@ -502,7 +501,7 @@
 				btn.forward.prop("disabled", false);
 				btn.fastForward.prop("disabled", false);
 				btn.auto.prop("disabled", false);
-			} else if ((goMap.index === goMap.count - 1) || (exGoMap.index > 0)) {// If at the end or after user put stones
+			} else if ((goMap.currentMoveIndex === goMap.totalMoveCount - 1) || (exGoMap.currentMoveIndex > 0)) {// If at the end or after user put stones
 				btn.begin.prop("disabled", false);
 				btn.backward.prop("disabled", false);
 				btn.fastBackward.prop("disabled", false);
@@ -531,13 +530,13 @@
 		 * Paint background color, lines, letters and numbers on the board
 		 */
 		function paintBoard() {
-			var wts = WIDTH - TS, hts = HEIGHT - TS,
+			var wts = BOARD_LENGTH - TS, hts = BOARD_LENGTH - TS,
 				i,
 				ss, hs, ws, baseCode, s3, code, t1;
 			// Draw color and lines of the board
 			bgContext.beginPath();
 			bgContext.fillStyle = "#D6B66F";
-			bgContext.fillRect(0, 0, WIDTH, HEIGHT);
+			bgContext.fillRect(0, 0, BOARD_LENGTH, BOARD_LENGTH);
 			for (i = 1; i < FS; i += 1) {
 				bgContext.moveTo(TS, SPACE * (i + 1));
 				bgContext.lineTo(wts, SPACE * (i + 1));
@@ -553,8 +552,8 @@
 			bgContext.font = "bold 12px sans-serif";
 			bgContext.textBaseline = "bottom";
 			ss = SPACE + (SPACE * 0.25);
-			hs = HEIGHT - (SPACE * 0.5);
-			ws = WIDTH - SPACE;
+			hs = BOARD_LENGTH - (SPACE * 0.5);
+			ws = BOARD_LENGTH - SPACE;
 			s3 = SPACE / 8;
 			baseCode = "A".charCodeAt(0);
 			for (i = 1; i < FS; i += 1) {
@@ -580,13 +579,13 @@
 		 * Paint stones, current position and steps on the board
 		 */
 		function paint() {
-			var index = exGoMap.index, c, c2,
+			var c, c2,
 				i, j,
 				gradient,
 				m,
 				s85, s75, s625,
 				fix, num;
-			if (exGoMap.index > 0) {
+			if (exGoMap.currentMoveIndex > 0) {
 				// Draw stone
 
 				for (i = 1; i < FS; i += 1) {
@@ -599,9 +598,12 @@
 							continue;
 						}
 						if (c === 0) {
-							ctx.fillStyle = "white";
+							ctx.fillStyle = "#E0E0E0";
 						} else if (c === 1) {
-							ctx.fillStyle = "black";
+							gradient = ctx.createRadialGradient(SPACE * (i + 1), SPACE * (j + 1), S, SPACE * (i + 1) - 3.2, SPACE * (j + 1) - 3, 0.5);
+							gradient.addColorStop(0, "#000000");
+							gradient.addColorStop(1, "#4f4f4f");
+							ctx.fillStyle = gradient;
 						}
 
 						if (c === 0 || c === 1) {
@@ -618,7 +620,7 @@
 				for (i = 1; i < FS; i += 1) {
 					for (j = 1; j < FS; j += 1) {
 						c = goMap.getCurrentMapCellColor(i, j);
-						c2 = (exGoMap.prevIndex > 0) ? exGoMap.getPrevMapCellColor(i, j) : goMap.getPrevMapCellColor(i, j);
+						c2 = (exGoMap.prevMoveIndex > 0) ? exGoMap.getPrevMapCellColor(i, j) : goMap.getPrevMapCellColor(i, j);
 
 						// Comment this because the red point would continue to show on previous stones.
 						// if(c2 === c) continue;
@@ -639,7 +641,7 @@
 
 						if (c === 0 || c === 1) {
 							ctx.beginPath();
-							ctx.arc(SPACE * i + SPACE, SPACE * (j + 1), S, 0, MP, true);
+							ctx.arc(SPACE * (i + 1), SPACE * (j + 1), S, 0, MP, true);
 							ctx.fill();
 							ctx.closePath();
 						}
@@ -648,7 +650,7 @@
 			}
 
 			// Tag the current move
-			if (goMap.index > 0) {
+			if (goMap.currentMoveIndex > 0) {
 				ctx.fillStyle = "red";
 				ctx.beginPath();
 				m = goMap.getCurrentMove();
@@ -665,7 +667,7 @@
 				ctx.font = "10px sans-serif";
 				for (i = 0; i < FS; i += 1) {
 					for (j = 0; j < FS; j += 1) {
-						c = exGoMap.index > 0 ? exGoMap.mapList[exGoMap.index][i][j].color : goMap.getCurrentMapCellColor(i, j);
+						c = exGoMap.currentMoveIndex > 0 ? exGoMap.mapList[exGoMap.currentMoveIndex][i][j].color : goMap.getCurrentMapCellColor(i, j);
 						if (c === 0 || c === 1) {
 							ctx.beginPath();
 
@@ -676,7 +678,7 @@
 							}
 
 							fix = 0;
-							num = exGoMap.index > 0 ? exGoMap.mapList[exGoMap.index][i][j].num : goMap.getCurrentMapCellNum(i, j);
+							num = exGoMap.currentMoveIndex > 0 ? exGoMap.mapList[exGoMap.currentMoveIndex][i][j].num : goMap.getCurrentMapCellNum(i, j);
 							if (num >= 100) {
 								fix = S;
 							} else if (num <= 0) {
@@ -715,7 +717,7 @@
 			x -= TS;
 			y -= TS;
 
-			if (x < 0 || y < 0 || x > BASE || y > BASE) {
+			if (x < 0 || y < 0 || x > BOARD_BASE_LENGTH || y > BOARD_BASE_LENGTH) {
 				return;
 			}
 			moveX = (x / SPACE) + 1;
@@ -741,7 +743,7 @@
 			}
 
 			// First click on the board
-			if (exGoMap.index === 0) {
+			if (exGoMap.currentMoveIndex === 0) {
 				currentMove = goMap.getCurrentMove();
 
 				// If the position I put is not empty, just ignore it
@@ -752,31 +754,31 @@
 				if (currentMove.x !== 0 && currentMove.y !== 0) {// Already exist some stones on the board
 
 					exGoMap.insertMap(goMap.getCurrentMap());
-					exGoMap.mapList[exGoMap.index + 1][moveX][moveY].color = 1 - goMap.getCurrentMapCellColor(currentMove.x, currentMove.y);
+					exGoMap.mapList[exGoMap.currentMoveIndex + 1][moveX][moveY].color = 1 - goMap.getCurrentMapCellColor(currentMove.x, currentMove.y);
 				} else if (currentMove.x === 0 && currentMove.y === 0) { // First click without any stone on the board
 					exGoMap.insertMap(goMap.getCurrentMap());
-					exGoMap.mapList[exGoMap.index + 1][moveX][moveY].color = 1;
+					exGoMap.mapList[exGoMap.currentMoveIndex + 1][moveX][moveY].color = 1;
 				}
 			} else {
-				tmp = exGoMap.moveList[exGoMap.index];
+				tmp = exGoMap.moveList[exGoMap.currentMoveIndex];
 
 				// If the position I put is not empty, then ignore it
-				if (exGoMap.mapList[exGoMap.index][moveX][moveY].color === 1 || exGoMap.mapList[exGoMap.index][moveX][moveY].color === 0) {
+				if (exGoMap.mapList[exGoMap.currentMoveIndex][moveX][moveY].color === 1 || exGoMap.mapList[exGoMap.currentMoveIndex][moveX][moveY].color === 0) {
 					return;
 				}
 
 				if (tmp.x !== 0 && tmp.y !== 0) {
-					exGoMap.insertMap(exGoMap.mapList[exGoMap.index]);
-					exGoMap.mapList[exGoMap.index + 1][moveX][moveY].color = 1 - exGoMap.mapList[exGoMap.index][tmp.x][tmp.y].color;
+					exGoMap.insertMap(exGoMap.mapList[exGoMap.currentMoveIndex]);
+					exGoMap.mapList[exGoMap.currentMoveIndex + 1][moveX][moveY].color = 1 - exGoMap.mapList[exGoMap.currentMoveIndex][tmp.x][tmp.y].color;
 				}
 			}
 
 			exGoMap.insertMove(new Move(moveX, moveY));
-			findDeadStone(exGoMap.mapList[exGoMap.index + 1], moveX, moveY);
-			exGoMap.prevIndex = exGoMap.index;
+			findDeadStone(exGoMap.mapList[exGoMap.currentMoveIndex + 1], moveX, moveY);
+			exGoMap.prevMoveIndex = exGoMap.currentMoveIndex;
 
-			exGoMap.index += 1;
-			exGoMap.count += 1; // Just for logic
+			exGoMap.currentMoveIndex += 1;
+			exGoMap.totalMoveCount += 1; // Just for logic
 			changeButtonState();
 			paint();
 		}
@@ -821,16 +823,16 @@
 			 * Move to the beginning of the game
 			 */
 			"begin" : function () {
-				goMap.prevIndex = 0;
-				goMap.index = 0;
-				if (exGoMap.index > 0) {
-					exGoMap.remove(exGoMap.index);
-					exGoMap.prevIndex = 0;
-					exGoMap.index = 0;
+				goMap.prevMoveIndex = 0;
+				goMap.currentMoveIndex = 0;
+				if (exGoMap.currentMoveIndex > 0) {
+					exGoMap.remove(exGoMap.currentMoveIndex);
+					exGoMap.prevMoveIndex = 0;
+					exGoMap.currentMoveIndex = 0;
 				}
 
 				// I think clearing the board here is better than sub rendering
-				ctx.drawImage(bgCanvas[0], 0, 0, WIDTH, HEIGHT);
+				ctx.drawImage(bgCanvas[0], 0, 0, BOARD_LENGTH, BOARD_LENGTH);
 				changeButtonState();
 				paint();
 			},
@@ -841,32 +843,32 @@
 			 * @param {Int} num The number of steps
 			 */
 			"backward" : function (num) {
-				if (exGoMap.index <= 0) {
-					goMap.prevIndex = goMap.index;
-					if (goMap.index === 0) {
+				if (exGoMap.currentMoveIndex <= 0) {
+					goMap.prevMoveIndex = goMap.currentMoveIndex;
+					if (goMap.currentMoveIndex === 0) {
 						return;
 					}
 
-					if (goMap.index - num <= 0) {
-						goMap.index = 0;
+					if (goMap.currentMoveIndex - num <= 0) {
+						goMap.currentMoveIndex = 0;
 					} else {
-						goMap.index -= num;
+						goMap.currentMoveIndex -= num;
 					}
 				} else {
-					exGoMap.prevIndex = exGoMap.index;
-					if (exGoMap.index - num <= 0) {
-						exGoMap.index = 0;
+					exGoMap.prevMoveIndex = exGoMap.currentMoveIndex;
+					if (exGoMap.currentMoveIndex - num <= 0) {
+						exGoMap.currentMoveIndex = 0;
 					} else {
-						exGoMap.index -= num;
+						exGoMap.currentMoveIndex -= num;
 					}
 				}
 				changeButtonState();
 				paint();
-				if (exGoMap.prevIndex > 0) {
+				if (exGoMap.prevMoveIndex > 0) {
 					exGoMap.remove(num);
 				}
-				if (exGoMap.index <= 0) {
-					exGoMap.prevIndex = 0;
+				if (exGoMap.currentMoveIndex <= 0) {
+					exGoMap.prevMoveIndex = 0;
 				}
 			},
 
@@ -876,15 +878,15 @@
 			 * @param {Int} num The number of steps
 			 */
 			"forward" : function (num) {
-				goMap.prevIndex = goMap.index;
-				if (goMap.index === goMap.count - 1) {
+				goMap.prevMoveIndex = goMap.currentMoveIndex;
+				if (goMap.currentMoveIndex === goMap.totalMoveCount - 1) {
 					return;
 				}
 
-				if (goMap.index + num >= goMap.count) {
-					goMap.index = goMap.count - 1;
+				if (goMap.currentMoveIndex + num >= goMap.totalMoveCount) {
+					goMap.currentMoveIndex = goMap.totalMoveCount - 1;
 				} else {
-					goMap.index += num;
+					goMap.currentMoveIndex += num;
 				}
 				changeButtonState();
 				paint();
@@ -894,8 +896,8 @@
 			 * Move to the end of the game
 			 */
 			"end" : function () {
-				goMap.prevIndex = goMap.index;
-				goMap.index = goMap.count - 1;
+				goMap.prevMoveIndex = goMap.currentMoveIndex;
+				goMap.currentMoveIndex = goMap.totalMoveCount - 1;
 				changeButtonState();
 				paint();
 			},
@@ -941,7 +943,7 @@
 		 * Called by API.setAuto
 		 */
 		function autoPlay() {
-			if (auto && goMap.index < goMap.count - 1) {
+			if (auto && goMap.currentMoveIndex < goMap.totalMoveCount - 1) {
 				API.forward(1);
 				setTimeout(function () {autoPlay(); }, TIME_INTERVAL);
 			}
