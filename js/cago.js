@@ -16,9 +16,9 @@
 			container, content, metaTable,
 			stoneCanvas, bgCanvas,
 			stoneContext, bgContext, // The context of canvas
-			tmpCanvas, // Canvas for pre-rendering
-			ctx, // The context of tmpCanvas
-			btn, // Store all the buttons in the html
+			tmpStoneCanvas, // Canvas for pre-rendering
+			tmpStoneContext, // The context of tmpStoneCanvas
+			btnList, // Store all the buttons in the html
 			metaTr, // tr row in metaTable which show meta data
 			// Program const variable
 			BOARD_LENGTH = BOARD_BASE_LENGTH + (BOARD_BASE_LENGTH / 10),
@@ -198,9 +198,9 @@
 		 */
 		function addToolTip() {
 			var key;
-			for (key in btn) {
-				if (btn.hasOwnProperty(key)) {
-					btn[key].tooltip({placement: "bottom"});
+			for (key in btnList) {
+				if (btnList.hasOwnProperty(key)) {
+					btnList[key].tooltip({placement: "bottom"});
 				}
 			}
 		}
@@ -233,15 +233,15 @@
 
 			toolBar = $("<div>").addClass("btn-toolbar");
 
-			btn = {};
-			btn.begin = $('<button class="btn" data-original-title="第一手"><i class="icon-step-backward"></i> </button>');
-			btn.fastBackward = $('<button class="btn" data-original-title="向前十手"><i class="icon-backward"></i> </button>');
-			btn.backward = $('<button class="btn" data-original-title="向前一手"><i class="icon-chevron-left"></i> </button>');
-			btn.forward = $('<button class="btn" data-original-title="向後一手"><i class="icon-chevron-right"></i> </button>');
-			btn.fastForward = $('<button class="btn" data-original-title="向後十手"><i class="icon-forward"></i> </button>');
-			btn.end = $('<button class="btn" data-original-title="最後一手"><i class="icon-step-forward"></i> </button>');
-			btn.flag = $('<button class="btn" data-original-title="顯示手數"><i class="icon-flag"></i> </button>');
-			btn.auto = $('<button class="btn" data-original-title="自動播放"><i class="icon-play-circle"></i> </button>');
+			btnList = {};
+			btnList.begin = $('<button class="btn" data-original-title="第一手"><i class="icon-step-backward"></i> </button>');
+			btnList.fastBackward = $('<button class="btn" data-original-title="向前十手"><i class="icon-backward"></i> </button>');
+			btnList.backward = $('<button class="btn" data-original-title="向前一手"><i class="icon-chevron-left"></i> </button>');
+			btnList.forward = $('<button class="btn" data-original-title="向後一手"><i class="icon-chevron-right"></i> </button>');
+			btnList.fastForward = $('<button class="btn" data-original-title="向後十手"><i class="icon-forward"></i> </button>');
+			btnList.end = $('<button class="btn" data-original-title="最後一手"><i class="icon-step-forward"></i> </button>');
+			btnList.flag = $('<button class="btn" data-original-title="顯示手數"><i class="icon-flag"></i> </button>');
+			btnList.auto = $('<button class="btn" data-original-title="自動播放"><i class="icon-play-circle"></i> </button>');
 
 			group1 = $('<div class="btn-group">');
 			group2 = $('<div class="btn-group">');
@@ -260,10 +260,10 @@
 			stoneContext = stoneCanvas[0].getContext("2d");
 			bgContext = bgCanvas[0].getContext("2d");
 
-			tmpCanvas = document.createElement("canvas");
-			tmpCanvas.width = BOARD_LENGTH;
-			tmpCanvas.height = BOARD_LENGTH;
-			ctx = tmpCanvas.getContext("2d");
+			tmpStoneCanvas = document.createElement("canvas");
+			tmpStoneCanvas.width = BOARD_LENGTH;
+			tmpStoneCanvas.height = BOARD_LENGTH;
+			tmpStoneContext = tmpStoneCanvas.getContext("2d");
 
 			metaTable = $(
 				'<table>\
@@ -289,9 +289,9 @@
 			metaTr.DT = $("<td>");
 
 			// Compose components
-			group1.append(btn.begin).append(btn.fastBackward).append(btn.backward).append(btn.forward).append(btn.fastForward).append(btn.end);
-			group2.append(btn.flag);
-			group3.append(btn.auto);
+			group1.append(btnList.begin).append(btnList.fastBackward).append(btnList.backward).append(btnList.forward).append(btnList.fastForward).append(btnList.end);
+			group2.append(btnList.flag);
+			group3.append(btnList.auto);
 			toolBar.append(group1).append(group2).append(group3);
 			content.append(bgCanvas).append(stoneCanvas);
 			row.append(metaTr.PB).append(metaTr.BR).append(metaTr.PW).append(metaTr.WR).append(metaTr.KM).append(metaTr.RE).append(metaTr.DT);
@@ -480,49 +480,49 @@
 		 */
 		function changeButtonState() {
 			if (auto === true) {
-				btn.begin.prop("disabled", auto);
-				btn.backward.prop("disabled", auto);
-				btn.fastBackward.prop("disabled", auto);
-				btn.end.prop("disabled", auto);
-				btn.forward.prop("disabled", auto);
-				btn.fastForward.prop("disabled", auto);
+				btnList.begin.prop("disabled", auto);
+				btnList.backward.prop("disabled", auto);
+				btnList.fastBackward.prop("disabled", auto);
+				btnList.end.prop("disabled", auto);
+				btnList.forward.prop("disabled", auto);
+				btnList.fastForward.prop("disabled", auto);
 				return;
 			}
 
 			if ((goMap.currentMoveIndex === 0) && (exGoMap.currentMoveIndex === 0)) { // Beginning
-				btn.begin.prop("disabled", true);
-				btn.begin.tooltip("hide");
-				btn.backward.prop("disabled", true);
-				btn.backward.tooltip("hide");
-				btn.fastBackward.prop("disabled", true);
-				btn.fastBackward.tooltip("hide");
+				btnList.begin.prop("disabled", true);
+				btnList.begin.tooltip("hide");
+				btnList.backward.prop("disabled", true);
+				btnList.backward.tooltip("hide");
+				btnList.fastBackward.prop("disabled", true);
+				btnList.fastBackward.tooltip("hide");
 
-				btn.end.prop("disabled", false);
-				btn.forward.prop("disabled", false);
-				btn.fastForward.prop("disabled", false);
-				btn.auto.prop("disabled", false);
+				btnList.end.prop("disabled", false);
+				btnList.forward.prop("disabled", false);
+				btnList.fastForward.prop("disabled", false);
+				btnList.auto.prop("disabled", false);
 			} else if ((goMap.currentMoveIndex === goMap.totalMoveCount - 1) || (exGoMap.currentMoveIndex > 0)) {// If at the end or after user put stones
-				btn.begin.prop("disabled", false);
-				btn.backward.prop("disabled", false);
-				btn.fastBackward.prop("disabled", false);
+				btnList.begin.prop("disabled", false);
+				btnList.backward.prop("disabled", false);
+				btnList.fastBackward.prop("disabled", false);
 
-				btn.end.prop("disabled", true);
-				btn.end.tooltip("hide");
-				btn.forward.prop("disabled", true);
-				btn.forward.tooltip("hide");
-				btn.fastForward.prop("disabled", true);
-				btn.fastForward.tooltip("hide");
-				btn.auto.prop("disabled", true);
-				btn.auto.tooltip("hide");
+				btnList.end.prop("disabled", true);
+				btnList.end.tooltip("hide");
+				btnList.forward.prop("disabled", true);
+				btnList.forward.tooltip("hide");
+				btnList.fastForward.prop("disabled", true);
+				btnList.fastForward.tooltip("hide");
+				btnList.auto.prop("disabled", true);
+				btnList.auto.tooltip("hide");
 			} else {
-				btn.begin.prop("disabled", false);
-				btn.backward.prop("disabled", false);
-				btn.fastBackward.prop("disabled", false);
-				btn.end.prop("disabled", false);
-				btn.forward.prop("disabled", false);
-				btn.fastForward.prop("disabled", false);
-				btn.auto.prop("disabled", false);
-				btn.auto.tooltip("hide");
+				btnList.begin.prop("disabled", false);
+				btnList.backward.prop("disabled", false);
+				btnList.fastBackward.prop("disabled", false);
+				btnList.end.prop("disabled", false);
+				btnList.forward.prop("disabled", false);
+				btnList.fastForward.prop("disabled", false);
+				btnList.auto.prop("disabled", false);
+				btnList.auto.tooltip("hide");
 			}
 		}
 
@@ -592,23 +592,23 @@
 			c2 = (exGoMap.prevMoveIndex > 0) ? exGoMap.getPrevMapCellColor(x, y) : goMap.getPrevMapCellColor(x, y);
 
 			if ((c2 === 0 || c2 === 1) && (c === -1)) { // Previous exist but now gone, so clear this part
-				ctx.clearRect(SPACE * (x + 0.5), SPACE * (y + 0.5), SPACE, SPACE, SPACE * (x + 0.5), SPACE * (y + 0.5), SPACE, SPACE);
+				tmpStoneContext.clearRect(SPACE * (x + 0.5), SPACE * (y + 0.5), SPACE, SPACE, SPACE * (x + 0.5), SPACE * (y + 0.5), SPACE, SPACE);
 				stoneContext.clearRect(SPACE * (x + 0.5), SPACE * (y + 0.5), SPACE, SPACE, SPACE * (x + 0.5), SPACE * (y + 0.5), SPACE, SPACE);
 			} else if (((c2 === -1) && (c === 0 || c === 1)) || (prevMove.x === x && prevMove.y === y)) {
 				if (c === 0) {
-					ctx.fillStyle = "#E0E0E0";
+					tmpStoneContext.fillStyle = "#E0E0E0";
 				} else if (c === 1) {
-					gradient = ctx.createRadialGradient(SPACE * (x + 1), SPACE * (y + 1), S, SPACE * (x + 1) - 3.2, SPACE * (y + 1) - 3, 0.5);
+					gradient = tmpStoneContext.createRadialGradient(SPACE * (x + 1), SPACE * (y + 1), S, SPACE * (x + 1) - 3.2, SPACE * (y + 1) - 3, 0.5);
 					gradient.addColorStop(0, "#000000");
 					gradient.addColorStop(1, "#4f4f4f");
-					ctx.fillStyle = gradient;
+					tmpStoneContext.fillStyle = gradient;
 				}
 
 				if (c === 0 || c === 1) {
-					ctx.beginPath();
-					ctx.arc(SPACE * (x + 1), SPACE * (y + 1), S, 0, MP, true);
-					ctx.fill();
-					ctx.closePath();
+					tmpStoneContext.beginPath();
+					tmpStoneContext.arc(SPACE * (x + 1), SPACE * (y + 1), S, 0, MP, true);
+					tmpStoneContext.fill();
+					tmpStoneContext.closePath();
 				}
 			}
 		}
@@ -633,12 +633,12 @@
 
 			// Tag the current move
 			if (goMap.currentMoveIndex > 0) {
-				ctx.fillStyle = "red";
-				ctx.beginPath();
+				tmpStoneContext.fillStyle = "red";
+				tmpStoneContext.beginPath();
 				m = goMap.getCurrentMove();
-				ctx.arc(SPACE * (m.x + 1), SPACE * (m.y + 1), S2, 0, MP, true);
-				ctx.fill();
-				ctx.closePath();
+				tmpStoneContext.arc(SPACE * (m.x + 1), SPACE * (m.y + 1), S2, 0, MP, true);
+				tmpStoneContext.fill();
+				tmpStoneContext.closePath();
 
 			}
 			if (displayNum) {
@@ -646,17 +646,17 @@
 				s75 = SPACE * 0.75;
 				s625 = SPACE * 0.625;
 
-				ctx.font = "10px sans-serif";
+				tmpStoneContext.font = "10px sans-serif";
 				for (i = 0; i < FS; i += 1) {
 					for (j = 0; j < FS; j += 1) {
 						c = exGoMap.currentMoveIndex > 0 ? exGoMap.mapList[exGoMap.currentMoveIndex][i][j].color : goMap.getCurrentMapCellColor(i, j);
 						if (c === 0 || c === 1) {
-							ctx.beginPath();
+							tmpStoneContext.beginPath();
 
 							if (c === 0) {
-								ctx.fillStyle = "black";
+								tmpStoneContext.fillStyle = "black";
 							} else if (c === 1) {
-								ctx.fillStyle = "white";
+								tmpStoneContext.fillStyle = "white";
 							}
 
 							fix = 0;
@@ -672,13 +672,13 @@
 							} else {
 								fix = s75;
 							}
-							ctx.fillText(num, SPACE * i + fix, SPACE * (j + 1.25));
-							ctx.closePath();
+							tmpStoneContext.fillText(num, SPACE * i + fix, SPACE * (j + 1.25));
+							tmpStoneContext.closePath();
 						}
 					}
 				}
 			}
-			stoneContext.drawImage(tmpCanvas, 0, 0);
+			stoneContext.drawImage(tmpStoneCanvas, 0, 0);
 		}
 
 		/*
@@ -814,7 +814,7 @@
 				}
 
 				// I think clearing the board here is better than sub rendering
-				ctx.drawImage(bgCanvas[0], 0, 0, BOARD_LENGTH, BOARD_LENGTH);
+				tmpStoneContext.drawImage(bgCanvas[0], 0, 0, BOARD_LENGTH, BOARD_LENGTH);
 				changeButtonState();
 				paint();
 			},
@@ -911,14 +911,14 @@
 		 * Add click event on buttons
 		 */
 		function addButtonEvent() {
-			btn.begin.click(API.begin);
-			btn.fastBackward.click(function () {API.backward(FAST_STEP_NUM); });
-			btn.backward.click(function () {API.backward(1); });
-			btn.forward.click(function () {API.forward(1); });
-			btn.fastForward.click(function () {API.forward(FAST_STEP_NUM); });
-			btn.end.click(API.end);
-			btn.flag.click(API.flag);
-			btn.auto.click(API.setAuto);
+			btnList.begin.click(API.begin);
+			btnList.fastBackward.click(function () {API.backward(FAST_STEP_NUM); });
+			btnList.backward.click(function () {API.backward(1); });
+			btnList.forward.click(function () {API.forward(1); });
+			btnList.fastForward.click(function () {API.forward(FAST_STEP_NUM); });
+			btnList.end.click(API.end);
+			btnList.flag.click(API.flag);
+			btnList.auto.click(API.setAuto);
 		}
 
 		/*
