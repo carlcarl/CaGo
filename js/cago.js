@@ -14,10 +14,11 @@
 			auto = false,
 			// DOM
 			container, content, metaTable,
-			stoneCanvas, bgCanvas,
-			stoneContext, bgContext, // The context of canvas
-			tmpStoneCanvas, // Canvas for pre-rendering
-			tmpStoneContext, // The context of tmpStoneCanvas
+			bgCanvas, bgContext,
+			stoneCanvas, stoneContext,
+			tmpStoneCanvas, tmpStoneContext,  // Canvas for pre-rendering
+			numberCanvas, numberContext,
+			tmpNumberCanvas, tmpNumberContext,
 			btnList, // Store all the buttons in the html
 			metaTr, // tr row in metaTable which show meta data
 			// Program const variable
@@ -252,18 +253,27 @@
 			bgCanvas = $("<canvas>").css({"position": "absolute", "border": "1px solid black", "z-index": "0"});
 			bgCanvas[0].width = BOARD_LENGTH;
 			bgCanvas[0].height = BOARD_LENGTH;
+			bgContext = bgCanvas[0].getContext("2d");
 
 			stoneCanvas = $("<canvas>").css({"position": "absolute", "border": "1px solid black", "z-index": "1"});
 			stoneCanvas[0].width = BOARD_LENGTH;
 			stoneCanvas[0].height = BOARD_LENGTH;
-
 			stoneContext = stoneCanvas[0].getContext("2d");
-			bgContext = bgCanvas[0].getContext("2d");
 
 			tmpStoneCanvas = document.createElement("canvas");
 			tmpStoneCanvas.width = BOARD_LENGTH;
 			tmpStoneCanvas.height = BOARD_LENGTH;
 			tmpStoneContext = tmpStoneCanvas.getContext("2d");
+
+			numberCanvas = $("<canvas>").css({"position": "absolute", "border": "1px solid black", "z-index": "2"});
+			numberCanvas[0].width = BOARD_LENGTH;
+			numberCanvas[0].height = BOARD_LENGTH;
+			numberContext = numberCanvas[0].getContext("2d");
+
+			tmpNumberCanvas = document.createElement("canvas");
+			tmpNumberCanvas.width = BOARD_LENGTH;
+			tmpNumberCanvas.height = BOARD_LENGTH;
+			tmpNumberContext = tmpNumberCanvas.getContext("2d");
 
 			metaTable = $(
 				'<table>\
@@ -293,7 +303,7 @@
 			group2.append(btnList.flag);
 			group3.append(btnList.auto);
 			toolBar.append(group1).append(group2).append(group3);
-			content.append(bgCanvas).append(stoneCanvas);
+			content.append(bgCanvas).append(stoneCanvas).append(numberCanvas);
 			row.append(metaTr.PB).append(metaTr.BR).append(metaTr.PW).append(metaTr.WR).append(metaTr.KM).append(metaTr.RE).append(metaTr.DT);
 			metaTable.append(row);
 			container.append(toolBar).append(content).append(metaTable);
@@ -596,7 +606,11 @@
 				stoneContext.clearRect(SPACE * (x + 0.5), SPACE * (y + 0.5), SPACE, SPACE, SPACE * (x + 0.5), SPACE * (y + 0.5), SPACE, SPACE);
 			} else if (((c2 === -1) && (c === 0 || c === 1)) || (prevMove.x === x && prevMove.y === y)) {
 				if (c === 0) {
-					tmpStoneContext.fillStyle = "#E0E0E0";
+					tmpStoneContext.fillStyle = "white";
+					// gradient = tmpStoneContext.createRadialGradient(SPACE * (x + 1), SPACE * (y + 1), S, SPACE * (x + 1) - 3.2, SPACE * (y + 1) - 3, 0.5);
+					// gradient.addColorStop(0, "#FFFFFF");
+					// gradient.addColorStop(1, "#D7D7D7");
+					// tmpStoneContext.fillStyle = gradient;
 				} else if (c === 1) {
 					gradient = tmpStoneContext.createRadialGradient(SPACE * (x + 1), SPACE * (y + 1), S, SPACE * (x + 1) - 3.2, SPACE * (y + 1) - 3, 0.5);
 					gradient.addColorStop(0, "#000000");
@@ -607,8 +621,8 @@
 				if (c === 0 || c === 1) {
 					tmpStoneContext.beginPath();
 					tmpStoneContext.arc(SPACE * (x + 1), SPACE * (y + 1), S, 0, MP, true);
-					tmpStoneContext.fill();
 					tmpStoneContext.closePath();
+					tmpStoneContext.fill();
 				}
 			}
 		}
@@ -633,30 +647,37 @@
 
 			// Tag the current move
 			if (goMap.currentMoveIndex > 0) {
+				m = goMap.getCurrentMove();
 				tmpStoneContext.fillStyle = "red";
 				tmpStoneContext.beginPath();
-				m = goMap.getCurrentMove();
 				tmpStoneContext.arc(SPACE * (m.x + 1), SPACE * (m.y + 1), S2, 0, MP, true);
-				tmpStoneContext.fill();
 				tmpStoneContext.closePath();
+				tmpStoneContext.fill();
 
 			}
+
+			stoneContext.drawImage(tmpStoneCanvas, 0, 0);
+
 			if (displayNum) {
 				s85 = SPACE * 0.85;
 				s75 = SPACE * 0.75;
 				s625 = SPACE * 0.625;
 
-				tmpStoneContext.font = "10px sans-serif";
-				for (i = 0; i < FS; i += 1) {
-					for (j = 0; j < FS; j += 1) {
-						c = exGoMap.currentMoveIndex > 0 ? exGoMap.mapList[exGoMap.currentMoveIndex][i][j].color : goMap.getCurrentMapCellColor(i, j);
-						if (c === 0 || c === 1) {
-							tmpStoneContext.beginPath();
+				tmpNumberContext.font = "6px sans";
+				for (i = 1; i < FS; i += 1) {
+					for (j = 1; j < FS; j += 1) {
+						c = (exGoMap.currentMoveIndex > 0) ? exGoMap.mapList[exGoMap.currentMoveIndex][i][j].color : goMap.getCurrentMapCellColor(i, j);
+						c2 = (exGoMap.prevMoveIndex > 0) ? exGoMap.getPrevMapCellColor(i, j) : goMap.getPrevMapCellColor(i, j);
+						/* console.log(i + ', ' + j + ': ' + c + ' ' + c2); */
+						if ((c2 === 0 || c2 === 1) && (c === -1)) { // Previous exist but now gone, so clear this part
+							tmpNumberContext.clearRect(SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE, SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE);
+							numberContext.clearRect(SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE, SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE);
+						} else if (((c2 === -1) && (c === 0 || c === 1)) || (prevMove.x === i && prevMove.y === j)) {
 
 							if (c === 0) {
-								tmpStoneContext.fillStyle = "black";
+								tmpNumberContext.fillStyle = "black";
 							} else if (c === 1) {
-								tmpStoneContext.fillStyle = "white";
+								tmpNumberContext.fillStyle = "white";
 							}
 
 							fix = 0;
@@ -672,13 +693,17 @@
 							} else {
 								fix = s75;
 							}
-							tmpStoneContext.fillText(num, SPACE * i + fix, SPACE * (j + 1.25));
-							tmpStoneContext.closePath();
+							tmpNumberContext.save();
+							tmpNumberContext.scale(0.8, 1);
+							tmpNumberContext.beginPath();
+							tmpNumberContext.fillText(num, 1.25 * (SPACE * i + fix), SPACE * (j + 1.25));
+							tmpNumberContext.closePath();
+							tmpNumberContext.restore();
 						}
 					}
 				}
+				numberContext.drawImage(tmpNumberCanvas, 0, 0);
 			}
-			stoneContext.drawImage(tmpStoneCanvas, 0, 0);
 		}
 
 		/*
@@ -783,7 +808,7 @@
 			addToolTip();
 			changeButtonState();
 			addButtonEvent();
-			stoneCanvas.click(putGo); // Use jQuery to work with IE
+			numberCanvas.click(putGo); // Use jQuery to work with IE
 		}
 
 		/*
@@ -805,7 +830,7 @@
 			 * Move to the beginning of the game
 			 */
 			"begin" : function () {
-				goMap.prevMoveIndex = 0;
+				goMap.prevMoveIndex = goMap.currentMoveIndex;
 				goMap.currentMoveIndex = 0;
 				if (exGoMap.currentMoveIndex > 0) {
 					exGoMap.remove(exGoMap.currentMoveIndex);
