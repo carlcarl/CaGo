@@ -621,8 +621,8 @@
 				if (c === 0 || c === 1) {
 					tmpStoneContext.beginPath();
 					tmpStoneContext.arc(SPACE * (x + 1), SPACE * (y + 1), S, 0, MP, true);
-					tmpStoneContext.closePath();
 					tmpStoneContext.fill();
+					tmpStoneContext.closePath();
 				}
 			}
 		}
@@ -647,12 +647,12 @@
 
 			// Tag the current move
 			if (goMap.currentMoveIndex > 0) {
-				m = goMap.getCurrentMove();
 				tmpStoneContext.fillStyle = "red";
 				tmpStoneContext.beginPath();
+				m = goMap.getCurrentMove();
 				tmpStoneContext.arc(SPACE * (m.x + 1), SPACE * (m.y + 1), S2, 0, MP, true);
-				tmpStoneContext.closePath();
 				tmpStoneContext.fill();
+				tmpStoneContext.closePath();
 
 			}
 
