@@ -16,7 +16,6 @@
 			container, content, metaTable,
 			bgCanvas, bgContext,
 			stoneCanvas, stoneContext,
-			tmpStoneCanvas, tmpStoneContext,  // Canvas for pre-rendering
 			numberCanvas, numberContext,
 			tmpNumberCanvas, tmpNumberContext,
 			btnList, // Store all the buttons in the html
@@ -259,11 +258,6 @@
 			stoneCanvas[0].width = BOARD_LENGTH;
 			stoneCanvas[0].height = BOARD_LENGTH;
 			stoneContext = stoneCanvas[0].getContext("2d");
-
-			tmpStoneCanvas = document.createElement("canvas");
-			tmpStoneCanvas.width = BOARD_LENGTH;
-			tmpStoneCanvas.height = BOARD_LENGTH;
-			tmpStoneContext = tmpStoneCanvas.getContext("2d");
 
 			numberCanvas = $("<canvas>").css({"position": "absolute", "border": "1px solid black", "z-index": "2"});
 			numberCanvas[0].width = BOARD_LENGTH;
@@ -606,10 +600,10 @@
 			} else if (((c2 === -1) && (c === 0 || c === 1)) || (prevMove.x === x && prevMove.y === y)) {
 				if (c === 0) {
 					stoneContext.fillStyle = "white";
-					// gradient = tmpStoneContext.createRadialGradient(SPACE * (x + 1), SPACE * (y + 1), S, SPACE * (x + 1) - 3.2, SPACE * (y + 1) - 3, 0.5);
+					// gradient = stoneContext.createRadialGradient(SPACE * (x + 1), SPACE * (y + 1), S, SPACE * (x + 1) - 3.2, SPACE * (y + 1) - 3, 0.5);
 					// gradient.addColorStop(0, "#FFFFFF");
 					// gradient.addColorStop(1, "#D7D7D7");
-					// tmpStoneContext.fillStyle = gradient;
+					// stoneContext.fillStyle = gradient;
 				} else if (c === 1) {
 					gradient = stoneContext.createRadialGradient(SPACE * (x + 1), SPACE * (y + 1), S, SPACE * (x + 1) - 3.2, SPACE * (y + 1) - 3, 0.5);
 					gradient.addColorStop(0, "#000000");
@@ -836,7 +830,7 @@
 				}
 
 				// I think clearing the board here is better than sub rendering
-				tmpStoneContext.drawImage(bgCanvas[0], 0, 0, BOARD_LENGTH, BOARD_LENGTH);
+				stoneContext.clearRect(0, 0, BOARD_LENGTH, BOARD_LENGTH);
 				changeButtonState();
 				paint();
 			},
