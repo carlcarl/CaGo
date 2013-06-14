@@ -602,27 +602,26 @@
 			c2 = (exGoMap.prevMoveIndex > 0) ? exGoMap.getPrevMapCellColor(x, y) : goMap.getPrevMapCellColor(x, y);
 
 			if ((c2 === 0 || c2 === 1) && (c === -1)) { // Previous exist but now gone, so clear this part
-				tmpStoneContext.clearRect(SPACE * (x + 0.5), SPACE * (y + 0.5), SPACE, SPACE, SPACE * (x + 0.5), SPACE * (y + 0.5), SPACE, SPACE);
 				stoneContext.clearRect(SPACE * (x + 0.5), SPACE * (y + 0.5), SPACE, SPACE, SPACE * (x + 0.5), SPACE * (y + 0.5), SPACE, SPACE);
 			} else if (((c2 === -1) && (c === 0 || c === 1)) || (prevMove.x === x && prevMove.y === y)) {
 				if (c === 0) {
-					tmpStoneContext.fillStyle = "white";
+					stoneContext.fillStyle = "white";
 					// gradient = tmpStoneContext.createRadialGradient(SPACE * (x + 1), SPACE * (y + 1), S, SPACE * (x + 1) - 3.2, SPACE * (y + 1) - 3, 0.5);
 					// gradient.addColorStop(0, "#FFFFFF");
 					// gradient.addColorStop(1, "#D7D7D7");
 					// tmpStoneContext.fillStyle = gradient;
 				} else if (c === 1) {
-					gradient = tmpStoneContext.createRadialGradient(SPACE * (x + 1), SPACE * (y + 1), S, SPACE * (x + 1) - 3.2, SPACE * (y + 1) - 3, 0.5);
+					gradient = stoneContext.createRadialGradient(SPACE * (x + 1), SPACE * (y + 1), S, SPACE * (x + 1) - 3.2, SPACE * (y + 1) - 3, 0.5);
 					gradient.addColorStop(0, "#000000");
 					gradient.addColorStop(1, "#4f4f4f");
-					tmpStoneContext.fillStyle = gradient;
+					stoneContext.fillStyle = gradient;
 				}
 
 				if (c === 0 || c === 1) {
-					tmpStoneContext.beginPath();
-					tmpStoneContext.arc(SPACE * (x + 1), SPACE * (y + 1), S, 0, MP, true);
-					tmpStoneContext.fill();
-					tmpStoneContext.closePath();
+					stoneContext.beginPath();
+					stoneContext.arc(SPACE * (x + 1), SPACE * (y + 1), S, 0, MP, true);
+					stoneContext.fill();
+					stoneContext.closePath();
 				}
 			}
 		}
@@ -647,16 +646,14 @@
 
 			// Tag the current move
 			if (goMap.currentMoveIndex > 0) {
-				tmpStoneContext.fillStyle = "red";
-				tmpStoneContext.beginPath();
+				stoneContext.fillStyle = "red";
+				stoneContext.beginPath();
 				m = goMap.getCurrentMove();
-				tmpStoneContext.arc(SPACE * (m.x + 1), SPACE * (m.y + 1), S2, 0, MP, true);
-				tmpStoneContext.fill();
-				tmpStoneContext.closePath();
+				stoneContext.arc(SPACE * (m.x + 1), SPACE * (m.y + 1), S2, 0, MP, true);
+				stoneContext.fill();
+				stoneContext.closePath();
 
 			}
-
-			stoneContext.drawImage(tmpStoneCanvas, 0, 0);
 
 			if (displayNum) {
 				s85 = SPACE * 0.85;
@@ -668,11 +665,10 @@
 					for (j = 1; j < FS; j += 1) {
 						c = (exGoMap.currentMoveIndex > 0) ? exGoMap.mapList[exGoMap.currentMoveIndex][i][j].color : goMap.getCurrentMapCellColor(i, j);
 						c2 = (exGoMap.prevMoveIndex > 0) ? exGoMap.getPrevMapCellColor(i, j) : goMap.getPrevMapCellColor(i, j);
-						/* console.log(i + ', ' + j + ': ' + c + ' ' + c2); */
 						if ((c2 === 0 || c2 === 1) && (c === -1)) { // Previous exist but now gone, so clear this part
 							tmpNumberContext.clearRect(SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE, SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE);
 							numberContext.clearRect(SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE, SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE);
-						} else if (((c2 === -1) && (c === 0 || c === 1)) || (prevMove.x === i && prevMove.y === j)) {
+						} else if ((c2 === -1) && (c === 0 || c === 1)) {
 
 							if (c === 0) {
 								tmpNumberContext.fillStyle = "black";
@@ -702,6 +698,7 @@
 						}
 					}
 				}
+				numberContext.clearRect(0, 0, BOARD_LENGTH, BOARD_LENGTH);
 				numberContext.drawImage(tmpNumberCanvas, 0, 0);
 			}
 		}
