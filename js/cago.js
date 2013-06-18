@@ -10,14 +10,13 @@
 		var BOARD_BASE_LENGTH = 400, LINE_NUM = 19,
 			FAST_STEP_NUM = 10, // One click with 10 steps
 			TIME_INTERVAL = 2000, // 2000ms
-			displayNum = false,
+			displayNum = false, paintAllNum = false,
 			auto = false,
 			// DOM
 			container, content, metaTable,
 			bgCanvas, bgContext,
 			stoneCanvas, stoneContext,
 			numberCanvas, numberContext,
-			tmpNumberCanvas, tmpNumberContext,
 			btnList, // Store all the buttons in the html
 			metaTr, // tr row in metaTable which show meta data
 			// Program const variable
@@ -263,11 +262,6 @@
 			numberCanvas[0].width = BOARD_LENGTH;
 			numberCanvas[0].height = BOARD_LENGTH;
 			numberContext = numberCanvas[0].getContext("2d");
-
-			tmpNumberCanvas = document.createElement("canvas");
-			tmpNumberCanvas.width = BOARD_LENGTH;
-			tmpNumberCanvas.height = BOARD_LENGTH;
-			tmpNumberContext = tmpNumberCanvas.getContext("2d");
 
 			metaTable = $(
 				'<table>\
@@ -599,11 +593,10 @@
 				stoneContext.clearRect(SPACE * (x + 0.5), SPACE * (y + 0.5), SPACE, SPACE, SPACE * (x + 0.5), SPACE * (y + 0.5), SPACE, SPACE);
 			} else if (((c2 === -1) && (c === 0 || c === 1)) || (prevMove.x === x && prevMove.y === y)) {
 				if (c === 0) {
-					stoneContext.fillStyle = "white";
-					// gradient = stoneContext.createRadialGradient(SPACE * (x + 1), SPACE * (y + 1), S, SPACE * (x + 1) - 3.2, SPACE * (y + 1) - 3, 0.5);
-					// gradient.addColorStop(0, "#FFFFFF");
-					// gradient.addColorStop(1, "#D7D7D7");
-					// stoneContext.fillStyle = gradient;
+					gradient = stoneContext.createRadialGradient(SPACE * (x + 1), SPACE * (y + 1), S, SPACE * (x + 1) - 3.2, SPACE * (y + 1) - 3, 0.5);
+					gradient.addColorStop(0, "#FFFFFF");
+					gradient.addColorStop(1, "#D7D7D7");
+					stoneContext.fillStyle = gradient;
 				} else if (c === 1) {
 					gradient = stoneContext.createRadialGradient(SPACE * (x + 1), SPACE * (y + 1), S, SPACE * (x + 1) - 3.2, SPACE * (y + 1) - 3, 0.5);
 					gradient.addColorStop(0, "#000000");
@@ -650,50 +643,50 @@
 			}
 
 			if (displayNum) {
+				s625 = SPACE * 0.625;
 				s85 = SPACE * 0.85;
 				s75 = SPACE * 0.75;
-				s625 = SPACE * 0.625;
 
-				tmpNumberContext.font = "6px sans";
 				for (i = 1; i < FS; i += 1) {
 					for (j = 1; j < FS; j += 1) {
 						c = (exGoMap.currentMoveIndex > 0) ? exGoMap.mapList[exGoMap.currentMoveIndex][i][j].color : goMap.getCurrentMapCellColor(i, j);
 						c2 = (exGoMap.prevMoveIndex > 0) ? exGoMap.getPrevMapCellColor(i, j) : goMap.getPrevMapCellColor(i, j);
 						if ((c2 === 0 || c2 === 1) && (c === -1)) { // Previous exist but now gone, so clear this part
-							tmpNumberContext.clearRect(SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE, SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE);
 							numberContext.clearRect(SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE, SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE);
-						} else if ((c2 === -1) && (c === 0 || c === 1)) {
+							numberContext.clearRect(SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE, SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE);
+						} else if (paintAllNum || ((c2 === -1) && (c === 0 || c === 1))) {
 
 							if (c === 0) {
-								tmpNumberContext.fillStyle = "black";
+								numberContext.fillStyle = "black";
 							} else if (c === 1) {
-								tmpNumberContext.fillStyle = "white";
+								numberContext.fillStyle = "white";
 							}
 
 							fix = 0;
 							num = exGoMap.currentMoveIndex > 0 ? exGoMap.mapList[exGoMap.currentMoveIndex][i][j].num : goMap.getCurrentMapCellNum(i, j);
 							if (num >= 100) {
-								fix = S;
+								fix = s625;
 							} else if (num <= 0) {
 								continue;
 							} else if (num < 10) {
 								fix = s85;
 							} else if (num < 100) {
-								fix = s625;
+								fix = s75;
 							} else {
 								fix = s75;
 							}
-							tmpNumberContext.save();
-							tmpNumberContext.scale(0.8, 1);
-							tmpNumberContext.beginPath();
-							tmpNumberContext.fillText(num, 1.25 * (SPACE * i + fix), SPACE * (j + 1.25));
-							tmpNumberContext.closePath();
-							tmpNumberContext.restore();
+							numberContext.save();
+							numberContext.scale(0.625, 1);
+							numberContext.beginPath();
+							numberContext.fillText(num, 1.6 * (SPACE * i + fix), SPACE * (j + 1.25));
+							numberContext.closePath();
+							numberContext.restore();
 						}
 					}
 				}
-				numberContext.clearRect(0, 0, BOARD_LENGTH, BOARD_LENGTH);
-				numberContext.drawImage(tmpNumberCanvas, 0, 0);
+				if (paintAllNum) {
+					paintAllNum = false;
+				}
 			}
 		}
 
@@ -905,6 +898,11 @@
 			 */
 			"flag" : function () {
 				displayNum = !displayNum;
+				if (displayNum) {
+					paintAllNum = true;
+				} else {
+					numberContext.clearRect(0, 0, BOARD_LENGTH, BOARD_LENGTH);
+				}
 				paint();
 			},
 
