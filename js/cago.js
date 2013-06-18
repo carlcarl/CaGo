@@ -9,7 +9,7 @@
 		// Your setting variable
 		var BOARD_BASE_LENGTH = 400, LINE_NUM = 19,
 			FAST_STEP_NUM = 10, // One click with 10 steps
-			TIME_INTERVAL = 2000, // 2000ms
+			AUTO_TIME_INTERVAL = 2000, // 2000ms
 			displayNum = false, paintAllNum = false,
 			auto = false,
 			// DOM
@@ -22,16 +22,16 @@
 			// Program const variable
 			BOARD_LENGTH = BOARD_BASE_LENGTH + (BOARD_BASE_LENGTH / 10),
 			SPACE = BOARD_BASE_LENGTH / (LINE_NUM + 1),
-			FIXED_SIZE = LINE_NUM + 2,
+			BOARD_ARRAY_SIZE = LINE_NUM + 2,
 			TOKEN_LIST = ["PW", "PB", "RE", "DT", "KM"], // The token needed to be found in the gibo file
 			OPTIONAL_TOKEN_LIST = ["WR", "BR"],
 			STEP_VECTOR = [[0, 1], [1, 0], [-1, 0], [0, -1]], // Used for easy traverse and find dead stones
 			// Improve performance
-			FS = LINE_NUM + 1,
-			S = SPACE / 2,
-			S2 = SPACE / 4,
-			TS = SPACE * 2,
-			MP = Math.PI * 2,
+			LINE_NUM_ADD_ONE = LINE_NUM + 1,
+			SPACE_DIVIDE_TWO = SPACE / 2,
+			SPACE_DIVIDE_FOUR = SPACE / 4,
+			SPACE_MUL_TWO = SPACE * 2,
+			PI_MUL_TWO = Math.PI * 2,
 			// Data structure
 			goMap,
 			exGoMap, // Store the steps made by user click
@@ -65,7 +65,7 @@
 		}
 
 		/*
-		 * Copy a 2D array with FIXED_SIZE
+		 * Copy a 2D array with BOARD_ARRAY_SIZE
 		 *
 		 * @param {Array} m A 2D array of MapMove object
 		 * @return {Array} Returns a clone of the 2D array of MapMove object
@@ -170,10 +170,10 @@
 		 */
 		GoMap.prototype.insertEmptyMap = function () {
 			var map = [], i, j;
-			for (i = 0; i < FIXED_SIZE; i += 1) {
+			for (i = 0; i < BOARD_ARRAY_SIZE; i += 1) {
 				map[i] = [];
-				for (j = 0; j < FIXED_SIZE; j += 1) {
-					if (i === 0 || i === FS || j === 0 || j === FS) {
+				for (j = 0; j < BOARD_ARRAY_SIZE; j += 1) {
+					if (i === 0 || i === LINE_NUM_ADD_ONE || j === 0 || j === LINE_NUM_ADD_ONE) {
 						map[i][j] = new MapMove(-2, 0);
 					} else {
 						map[i][j] = new MapMove(-1, 0);
@@ -217,10 +217,10 @@
 				group1, group2, group3,
 				row;
 
-			for (i = 0; i < FIXED_SIZE; i += 1) {
+			for (i = 0; i < BOARD_ARRAY_SIZE; i += 1) {
 				map[i] = [];
-				for (j = 0; j < FIXED_SIZE; j += 1) {
-					if (i === 0 || i === FS || j === 0 || j === FS) {
+				for (j = 0; j < BOARD_ARRAY_SIZE; j += 1) {
+					if (i === 0 || i === LINE_NUM_ADD_ONE || j === 0 || j === LINE_NUM_ADD_ONE) {
 						map[i][j] = new MapMove(-2, 0);
 					} else {
 						map[i][j] = new MapMove(-1, 0);
@@ -528,17 +528,17 @@
 		 * Paint background color, lines, letters and numbers on the board
 		 */
 		function paintBoard() {
-			var wts = BOARD_LENGTH - TS, hts = BOARD_LENGTH - TS,
+			var wts = BOARD_LENGTH - SPACE_MUL_TWO, hts = BOARD_LENGTH - SPACE_MUL_TWO,
 				i,
 				ss, hs, ws, baseCode, s3, code, t1;
 			// Draw color and lines of the board
 			bgContext.beginPath();
 			bgContext.fillStyle = "#D6B66F";
 			bgContext.fillRect(0, 0, BOARD_LENGTH, BOARD_LENGTH);
-			for (i = 1; i < FS; i += 1) {
-				bgContext.moveTo(TS, SPACE * (i + 1));
+			for (i = 1; i < LINE_NUM_ADD_ONE; i += 1) {
+				bgContext.moveTo(SPACE_MUL_TWO, SPACE * (i + 1));
 				bgContext.lineTo(wts, SPACE * (i + 1));
-				bgContext.moveTo(SPACE * (i + 1), TS);
+				bgContext.moveTo(SPACE * (i + 1), SPACE_MUL_TWO);
 				bgContext.lineTo(SPACE * (i + 1), hts);
 			}
 			bgContext.stroke();
@@ -554,7 +554,7 @@
 			ws = BOARD_LENGTH - SPACE;
 			s3 = SPACE / 8;
 			baseCode = "A".charCodeAt(0);
-			for (i = 1; i < FS; i += 1) {
+			for (i = 1; i < LINE_NUM_ADD_ONE; i += 1) {
 				code = baseCode + i - 1;
 
 				bgContext.fillText(String.fromCharCode(code), SPACE * (i + 0.75), ss);
@@ -565,7 +565,7 @@
 					bgContext.fillText(String(20 - i), s3, t1);
 					bgContext.fillText(String(20 - i), ws, t1);
 				} else {
-					bgContext.fillText(String(20 - i), S, t1);
+					bgContext.fillText(String(20 - i), SPACE_DIVIDE_TWO, t1);
 					bgContext.fillText(String(20 - i), ws, t1);
 				}
 			}
@@ -576,40 +576,115 @@
 		/*
 		 * Paint stone
 		 */
-		function paintStone(x, y, prevMove) {
-			var tmpGoMap, c, c2,
+		function paintStones() {
+			var i, j,
+				prevMove, tmpGoMap, c, c2,
 				gradient;
 
-			if (exGoMap.currentMoveIndex > 0) {
-				tmpGoMap = exGoMap;
-			} else {
-				tmpGoMap = goMap;
+			prevMove = (exGoMap.prevMoveIndex > 0) ? exGoMap.getPrevMove() : goMap.getPrevMove();
+			for (i = 1; i < LINE_NUM_ADD_ONE; i += 1) {
+				for (j = 1; j < LINE_NUM_ADD_ONE; j += 1) {
+
+					if (exGoMap.currentMoveIndex > 0) {
+						tmpGoMap = exGoMap;
+					} else {
+						tmpGoMap = goMap;
+					}
+
+					c = tmpGoMap.getCurrentMapCellColor(i, j);
+					c2 = (exGoMap.prevMoveIndex > 0) ? exGoMap.getPrevMapCellColor(i, j) : goMap.getPrevMapCellColor(i, j);
+
+					if ((c2 === 0 || c2 === 1) && (c === -1)) { // Previous exist but now gone, so clear this part
+						stoneContext.clearRect(SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE, SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE);
+					} else if (((c2 === -1) && (c === 0 || c === 1)) || (prevMove.x === i && prevMove.y === j)) {
+						if (c === 0) {
+							gradient = stoneContext.createRadialGradient(SPACE * (i + 1), SPACE * (j + 1), SPACE_DIVIDE_TWO, SPACE * (i + 1) - 3.2, SPACE * (j + 1) - 3, 0.5);
+							gradient.addColorStop(0, "#FFFFFF");
+							gradient.addColorStop(1, "#D7D7D7");
+							stoneContext.fillStyle = gradient;
+						} else if (c === 1) {
+							gradient = stoneContext.createRadialGradient(SPACE * (i + 1), SPACE * (j + 1), SPACE_DIVIDE_TWO, SPACE * (i + 1) - 3.2, SPACE * (j + 1) - 3, 0.5);
+							gradient.addColorStop(0, "#000000");
+							gradient.addColorStop(1, "#4f4f4f");
+							stoneContext.fillStyle = gradient;
+						}
+
+						if (c === 0 || c === 1) {
+							stoneContext.beginPath();
+							stoneContext.arc(SPACE * (i + 1), SPACE * (j + 1), SPACE_DIVIDE_TWO, 0, PI_MUL_TWO, true);
+							stoneContext.fill();
+							stoneContext.closePath();
+						}
+					}
+				}
 			}
+		}
 
-			c = tmpGoMap.getCurrentMapCellColor(x, y);
-			c2 = (exGoMap.prevMoveIndex > 0) ? exGoMap.getPrevMapCellColor(x, y) : goMap.getPrevMapCellColor(x, y);
+		/*
+		 * Paint current move with color point
+		 */
+		function paintCurrentMove() {
+			var m;
 
-			if ((c2 === 0 || c2 === 1) && (c === -1)) { // Previous exist but now gone, so clear this part
-				stoneContext.clearRect(SPACE * (x + 0.5), SPACE * (y + 0.5), SPACE, SPACE, SPACE * (x + 0.5), SPACE * (y + 0.5), SPACE, SPACE);
-			} else if (((c2 === -1) && (c === 0 || c === 1)) || (prevMove.x === x && prevMove.y === y)) {
-				if (c === 0) {
-					gradient = stoneContext.createRadialGradient(SPACE * (x + 1), SPACE * (y + 1), S, SPACE * (x + 1) - 3.2, SPACE * (y + 1) - 3, 0.5);
-					gradient.addColorStop(0, "#FFFFFF");
-					gradient.addColorStop(1, "#D7D7D7");
-					stoneContext.fillStyle = gradient;
-				} else if (c === 1) {
-					gradient = stoneContext.createRadialGradient(SPACE * (x + 1), SPACE * (y + 1), S, SPACE * (x + 1) - 3.2, SPACE * (y + 1) - 3, 0.5);
-					gradient.addColorStop(0, "#000000");
-					gradient.addColorStop(1, "#4f4f4f");
-					stoneContext.fillStyle = gradient;
+			stoneContext.fillStyle = "red";
+			stoneContext.beginPath();
+			m = goMap.getCurrentMove();
+			stoneContext.arc(SPACE * (m.x + 1), SPACE * (m.y + 1), SPACE_DIVIDE_FOUR, 0, PI_MUL_TWO, true);
+			stoneContext.fill();
+			stoneContext.closePath();
+		}
+
+		/*
+		 * Paint numbers on the stones
+		 */
+		function paintNumbers() {
+			var currentColor, prevColor,
+				i, j,
+				s85, s75, s625,
+				fix, num;
+
+			s625 = SPACE * 0.625;
+			s85 = SPACE * 0.85;
+			s75 = SPACE * 0.75;
+
+			for (i = 1; i < LINE_NUM_ADD_ONE; i += 1) {
+				for (j = 1; j < LINE_NUM_ADD_ONE; j += 1) {
+					currentColor = (exGoMap.currentMoveIndex > 0) ? exGoMap.mapList[exGoMap.currentMoveIndex][i][j].color : goMap.getCurrentMapCellColor(i, j);
+					prevColor = (exGoMap.prevMoveIndex > 0) ? exGoMap.getPrevMapCellColor(i, j) : goMap.getPrevMapCellColor(i, j);
+					if ((prevColor === 0 || prevColor === 1) && (currentColor === -1)) { // Previous exist but now gone, so clear this part
+						numberContext.clearRect(SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE, SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE);
+					} else if (paintAllNum || ((prevColor === -1) && (currentColor === 0 || currentColor === 1))) {
+
+						if (currentColor === 0) {
+							numberContext.fillStyle = "black";
+						} else if (currentColor === 1) {
+							numberContext.fillStyle = "white";
+						}
+
+						fix = 0;
+						num = exGoMap.currentMoveIndex > 0 ? exGoMap.mapList[exGoMap.currentMoveIndex][i][j].num : goMap.getCurrentMapCellNum(i, j);
+						if (num >= 100) {
+							fix = s625;
+						} else if (num <= 0) {
+							continue;
+						} else if (num < 10) {
+							fix = s85;
+						} else if (num < 100) {
+							fix = s75;
+						} else {
+							fix = s75;
+						}
+						numberContext.save();
+						numberContext.scale(0.625, 1);
+						numberContext.beginPath();
+						numberContext.fillText(num, 1.6 * (SPACE * i + fix), SPACE * (j + 1.25));
+						numberContext.closePath();
+						numberContext.restore();
+					}
 				}
-
-				if (c === 0 || c === 1) {
-					stoneContext.beginPath();
-					stoneContext.arc(SPACE * (x + 1), SPACE * (y + 1), S, 0, MP, true);
-					stoneContext.fill();
-					stoneContext.closePath();
-				}
+			}
+			if (paintAllNum) {
+				paintAllNum = false;
 			}
 		}
 
@@ -617,76 +692,16 @@
 		 * Paint stones, current position and steps on the board
 		 */
 		function paint() {
-			var c, c2,
-				i, j,
-				m,
-				s85, s75, s625,
-				fix, num,
-				prevMove;
 
-			prevMove = (exGoMap.prevMoveIndex > 0) ? exGoMap.getPrevMove() : goMap.getPrevMove();
-			for (i = 1; i < FS; i += 1) {
-				for (j = 1; j < FS; j += 1) {
-					paintStone(i, j, prevMove);
-				}
-			}
+			paintStones();
 
 			// Tag the current move
 			if (goMap.currentMoveIndex > 0) {
-				stoneContext.fillStyle = "red";
-				stoneContext.beginPath();
-				m = goMap.getCurrentMove();
-				stoneContext.arc(SPACE * (m.x + 1), SPACE * (m.y + 1), S2, 0, MP, true);
-				stoneContext.fill();
-				stoneContext.closePath();
-
+				paintCurrentMove();
 			}
 
 			if (displayNum) {
-				s625 = SPACE * 0.625;
-				s85 = SPACE * 0.85;
-				s75 = SPACE * 0.75;
-
-				for (i = 1; i < FS; i += 1) {
-					for (j = 1; j < FS; j += 1) {
-						c = (exGoMap.currentMoveIndex > 0) ? exGoMap.mapList[exGoMap.currentMoveIndex][i][j].color : goMap.getCurrentMapCellColor(i, j);
-						c2 = (exGoMap.prevMoveIndex > 0) ? exGoMap.getPrevMapCellColor(i, j) : goMap.getPrevMapCellColor(i, j);
-						if ((c2 === 0 || c2 === 1) && (c === -1)) { // Previous exist but now gone, so clear this part
-							numberContext.clearRect(SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE, SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE);
-							numberContext.clearRect(SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE, SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE);
-						} else if (paintAllNum || ((c2 === -1) && (c === 0 || c === 1))) {
-
-							if (c === 0) {
-								numberContext.fillStyle = "black";
-							} else if (c === 1) {
-								numberContext.fillStyle = "white";
-							}
-
-							fix = 0;
-							num = exGoMap.currentMoveIndex > 0 ? exGoMap.mapList[exGoMap.currentMoveIndex][i][j].num : goMap.getCurrentMapCellNum(i, j);
-							if (num >= 100) {
-								fix = s625;
-							} else if (num <= 0) {
-								continue;
-							} else if (num < 10) {
-								fix = s85;
-							} else if (num < 100) {
-								fix = s75;
-							} else {
-								fix = s75;
-							}
-							numberContext.save();
-							numberContext.scale(0.625, 1);
-							numberContext.beginPath();
-							numberContext.fillText(num, 1.6 * (SPACE * i + fix), SPACE * (j + 1.25));
-							numberContext.closePath();
-							numberContext.restore();
-						}
-					}
-				}
-				if (paintAllNum) {
-					paintAllNum = false;
-				}
+				paintNumbers();
 			}
 		}
 
@@ -705,8 +720,8 @@
 			x = e.pageX - stoneCanvas.offset().left;
 			y = e.pageY - stoneCanvas.offset().top;
 
-			x -= TS;
-			y -= TS;
+			x -= SPACE_MUL_TWO;
+			y -= SPACE_MUL_TWO;
 
 			if (x < 0 || y < 0 || x > BOARD_BASE_LENGTH || y > BOARD_BASE_LENGTH) {
 				return;
@@ -741,8 +756,8 @@
 				if (goMap.getCurrentMapCellColor(moveX, moveY) === 1 || goMap.getCurrentMapCellColor(moveX, moveY) === 0) {
 					return;
 				}
-				
-				if (currentMove.x !== 0 && currentMove.y !== 0) {// Already exist some stones on the board
+
+				if (currentMove.x !== 0 && currentMove.y !== 0) { // Already exist some stones on the board
 
 					exGoMap.insertMap(goMap.getCurrentMap());
 					exGoMap.mapList[exGoMap.currentMoveIndex + 1][moveX][moveY].color = 1 - goMap.getCurrentMapCellColor(currentMove.x, currentMove.y);
@@ -753,7 +768,7 @@
 			} else {
 				tmp = exGoMap.moveList[exGoMap.currentMoveIndex];
 
-				// If the position I put is not empty, then ignore it
+				// If the position I put is not empty, ignore it
 				if (exGoMap.mapList[exGoMap.currentMoveIndex][moveX][moveY].color === 1 || exGoMap.mapList[exGoMap.currentMoveIndex][moveX][moveY].color === 0) {
 					return;
 				}
@@ -941,7 +956,7 @@
 		function autoPlay() {
 			if (auto && goMap.currentMoveIndex < goMap.totalMoveCount - 1) {
 				API.forward(1);
-				setTimeout(function () {autoPlay(); }, TIME_INTERVAL);
+				setTimeout(function () {autoPlay(); }, AUTO_TIME_INTERVAL);
 			}
 		}
 
