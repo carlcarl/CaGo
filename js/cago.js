@@ -35,6 +35,7 @@
 			// Data structure
 			goMap,
 			exGoMap, // Store the steps made by user click
+			blackStoneCanvas, blackStoneContext, whiteStoneCanvas, whiteStoneContext,
 			metaList, // Store file meta info 
 			map,
 			API;
@@ -215,7 +216,8 @@
 			var i, j,
 				toolBar,
 				group1, group2, group3,
-				row;
+				row,
+				gradient;
 
 			for (i = 0; i < BOARD_ARRAY_SIZE; i += 1) {
 				map[i] = [];
@@ -262,6 +264,36 @@
 			numberCanvas[0].width = BOARD_LENGTH;
 			numberCanvas[0].height = BOARD_LENGTH;
 			numberContext = numberCanvas[0].getContext("2d");
+
+			blackStoneCanvas = $("<canvas>");
+			blackStoneCanvas[0].width = SPACE;
+			blackStoneCanvas[0].height = SPACE;
+			blackStoneContext = blackStoneCanvas[0].getContext("2d");
+
+			gradient = blackStoneContext.createRadialGradient(SPACE_DIVIDE_TWO, SPACE_DIVIDE_TWO, SPACE_DIVIDE_TWO, SPACE_DIVIDE_TWO - 3.2, SPACE_DIVIDE_TWO - 3, 0.5);
+			gradient.addColorStop(0, "#000000");
+			gradient.addColorStop(1, "#4f4f4f");
+			blackStoneContext.fillStyle = gradient;
+
+			blackStoneContext.beginPath();
+			blackStoneContext.arc(SPACE_DIVIDE_TWO, SPACE_DIVIDE_TWO, SPACE_DIVIDE_TWO, 0, PI_MUL_TWO, true);
+			blackStoneContext.fill();
+			blackStoneContext.closePath();
+
+			whiteStoneCanvas = $("<canvas>");
+			whiteStoneCanvas[0].width = SPACE;
+			whiteStoneCanvas[0].height = SPACE;
+			whiteStoneContext = whiteStoneCanvas[0].getContext("2d");
+
+			gradient = whiteStoneContext.createRadialGradient(SPACE_DIVIDE_TWO, SPACE_DIVIDE_TWO, SPACE_DIVIDE_TWO, SPACE_DIVIDE_TWO - 3.2, SPACE_DIVIDE_TWO - 3, 0.5);
+			gradient.addColorStop(0, "#FFFFFF");
+			gradient.addColorStop(1, "#D7D7D7");
+			whiteStoneContext.fillStyle = gradient;
+
+			whiteStoneContext.beginPath();
+			whiteStoneContext.arc(SPACE_DIVIDE_TWO, SPACE_DIVIDE_TWO, SPACE_DIVIDE_TWO, 0, PI_MUL_TWO, true);
+			whiteStoneContext.fill();
+			whiteStoneContext.closePath();
 
 			metaTable = $(
 				'<table>\
@@ -598,22 +630,9 @@
 						stoneContext.clearRect(SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE, SPACE * (i + 0.5), SPACE * (j + 0.5), SPACE, SPACE);
 					} else if (((c2 === -1) && (c === 0 || c === 1)) || (prevMove.x === i && prevMove.y === j)) {
 						if (c === 0) {
-							gradient = stoneContext.createRadialGradient(SPACE * (i + 1), SPACE * (j + 1), SPACE_DIVIDE_TWO, SPACE * (i + 1) - 3.2, SPACE * (j + 1) - 3, 0.5);
-							gradient.addColorStop(0, "#FFFFFF");
-							gradient.addColorStop(1, "#D7D7D7");
-							stoneContext.fillStyle = gradient;
+							stoneContext.drawImage(whiteStoneCanvas[0], SPACE * (i + 0.5), SPACE * (j + 0.5));
 						} else if (c === 1) {
-							gradient = stoneContext.createRadialGradient(SPACE * (i + 1), SPACE * (j + 1), SPACE_DIVIDE_TWO, SPACE * (i + 1) - 3.2, SPACE * (j + 1) - 3, 0.5);
-							gradient.addColorStop(0, "#000000");
-							gradient.addColorStop(1, "#4f4f4f");
-							stoneContext.fillStyle = gradient;
-						}
-
-						if (c === 0 || c === 1) {
-							stoneContext.beginPath();
-							stoneContext.arc(SPACE * (i + 1), SPACE * (j + 1), SPACE_DIVIDE_TWO, 0, PI_MUL_TWO, true);
-							stoneContext.fill();
-							stoneContext.closePath();
+							stoneContext.drawImage(blackStoneCanvas[0], SPACE * (i + 0.5), SPACE * (j + 0.5));
 						}
 					}
 				}

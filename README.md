@@ -18,8 +18,6 @@ In index.html, find *cago.go* and modify its argument.
 
 ## Todo ##
 
-* Decrease paint frequnecy on gradient stones.
-* Pre draw 361 stones on two canvases(black and white), then draw stones using the two canvases.
 * Decrease the memory usage when using multiple cago in a page.
 
 ## Library version ##
