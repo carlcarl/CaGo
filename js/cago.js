@@ -216,7 +216,7 @@
 			var i, j,
 				toolBar,
 				group1, group2, group3,
-				row,
+				row, thead,
 				gradient;
 
 			for (i = 0; i < BOARD_ARRAY_SIZE; i += 1) {
@@ -232,21 +232,21 @@
 
 			container.css({"width": "500px", "margin": "5px"});
 
-			toolBar = $("<div>").addClass("btn-toolbar");
+			toolBar = $("<div>").addClass("btn-toolbar").css({"margin-bottom": "10px"});
 
 			btnList = {};
-			btnList.begin = $('<button class="btn" data-original-title="第一手"><i class="icon-step-backward"></i> </button>');
-			btnList.fastBackward = $('<button class="btn" data-original-title="向前十手"><i class="icon-backward"></i> </button>');
-			btnList.backward = $('<button class="btn" data-original-title="向前一手"><i class="icon-chevron-left"></i> </button>');
-			btnList.forward = $('<button class="btn" data-original-title="向後一手"><i class="icon-chevron-right"></i> </button>');
-			btnList.fastForward = $('<button class="btn" data-original-title="向後十手"><i class="icon-forward"></i> </button>');
-			btnList.end = $('<button class="btn" data-original-title="最後一手"><i class="icon-step-forward"></i> </button>');
-			btnList.flag = $('<button class="btn" data-original-title="顯示手數"><i class="icon-flag"></i> </button>');
-			btnList.auto = $('<button class="btn" data-original-title="自動播放"><i class="icon-play-circle"></i> </button>');
+			btnList.begin = $('<button class="btn btn-default" data-original-title="第一手"><span class="glyphicon glyphicon-fast-backward"></span> </button>');
+			btnList.fastBackward = $('<button class="btn btn-default" data-original-title="向前十手"><span class="glyphicon glyphicon-backward"></i> </button>');
+			btnList.backward = $('<button class="btn btn-default" data-original-title="向前一手"><span class="glyphicon glyphicon-chevron-left"></i> </button>');
+			btnList.forward = $('<button class="btn btn-default" data-original-title="向後一手"><i class="glyphicon glyphicon-chevron-right"></i> </button>');
+			btnList.fastForward = $('<button class="btn btn-default" data-original-title="向後十手"><span class="glyphicon glyphicon-forward"></i> </button>');
+			btnList.end = $('<button class="btn btn-default" data-original-title="最後一手"><span class="glyphicon glyphicon-fast-forward"></i> </button>');
+			btnList.flag = $('<button class="btn btn-default" data-original-title="顯示手數"><span class="glyphicon glyphicon-flag"></i> </button>');
+			btnList.auto = $('<button class="btn btn-default" data-original-title="自動播放"><span class="glyphicon glyphicon-repeat"></i> </button>');
 
-			group1 = $('<div class="btn-group">');
-			group2 = $('<div class="btn-group">');
-			group3 = $('<div class="btn-group">');
+			group1 = $('<div class="btn-group btn-group-sm">');
+			group2 = $('<div class="btn-group btn-group-sm">');
+			group3 = $('<div class="btn-group btn-group-sm">');
 
 			content = $("<div>").css({"width": BOARD_LENGTH, "height": BOARD_LENGTH});
 
@@ -307,7 +307,8 @@
 					<th>日期</th>\
 					</tr>\
 					</table>'
-			).addClass("table table-striped").css({"width": String(BOARD_LENGTH) + "px", "display": "none"});
+			).addClass("table").css({"width": String(BOARD_LENGTH) + "px", "display": "none"});
+			thead = $("<thead>");
 			row = $("<tr>");
 			metaTr = [];
 			metaTr.PB = $("<td>");
@@ -325,7 +326,8 @@
 			toolBar.append(group1).append(group2).append(group3);
 			content.append(bgCanvas).append(stoneCanvas).append(numberCanvas);
 			row.append(metaTr.PB).append(metaTr.BR).append(metaTr.PW).append(metaTr.WR).append(metaTr.KM).append(metaTr.RE).append(metaTr.DT);
-			metaTable.append(row);
+			thead.append(row);
+			metaTable.append(thead);
 			container.append(toolBar).append(content).append(metaTable);
 		}
 
@@ -659,12 +661,13 @@
 		function paintNumbers() {
 			var currentColor, prevColor,
 				i, j,
-				s85, s75, s625,
-				fix, num;
+				spaceOneDigit, spaceTwoDigit, spaceThreeDigit,
+				fix, num, fontSize;
 
-			s625 = SPACE * 0.625;
-			s85 = SPACE * 0.85;
-			s75 = SPACE * 0.75;
+			spaceThreeDigit = SPACE * 0.625;
+			spaceOneDigit = SPACE * 0.85;
+			spaceTwoDigit = SPACE * 0.75;
+			fontSize = SPACE * 0.7;
 
 			for (i = 1; i < LINE_NUM_ADD_ONE; i += 1) {
 				for (j = 1; j < LINE_NUM_ADD_ONE; j += 1) {
@@ -683,19 +686,20 @@
 						fix = 0;
 						num = exGoMap.currentMoveIndex > 0 ? exGoMap.mapList[exGoMap.currentMoveIndex][i][j].num : goMap.getCurrentMapCellNum(i, j);
 						if (num >= 100) {
-							fix = s625;
+							fix = spaceThreeDigit;
 						} else if (num <= 0) {
 							continue;
 						} else if (num < 10) {
-							fix = s85;
+							fix = spaceOneDigit;
 						} else if (num < 100) {
-							fix = s75;
+							fix = spaceTwoDigit;
 						} else {
-							fix = s75;
+							fix = spaceTwoDigit;
 						}
 						numberContext.save();
 						numberContext.scale(0.625, 1);
 						numberContext.beginPath();
+						numberContext.font = fontSize.toString() + "px Helvetica";
 						numberContext.fillText(num, 1.6 * (SPACE * i + fix), SPACE * (j + 1.25));
 						numberContext.closePath();
 						numberContext.restore();
