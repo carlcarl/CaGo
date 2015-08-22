@@ -11,7 +11,7 @@ A jQuery plugin to parse and play go gibo(圍棋棋譜)
 
 In index.html, find *cago.go* and modify its argument.
 
-	$(document).ready(function(){
+	$(function(){
 		$(".container").cago("./example.sgf");
 		$(".container2").cago("./example.sgf");
 	});
