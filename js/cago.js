@@ -230,7 +230,7 @@
 				}
 			}
 
-			container.css({"width": "500px", "margin": "5px"});
+			container.css({"width": "500px"});
 
 			toolBar = $("<div>").addClass("btn-toolbar").css({"margin-bottom": "10px"});
 
